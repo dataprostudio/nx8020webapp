@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Mining Web App</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">Process Mining</div>
+        <ul class="nav-links">
+            <li><a href="#" class="active" data-page="upload">Data Input</a></li>
+            <li><a href="#" data-page="visualization">Workflow Visualization</a></li>
+            <li><a href="#" data-page="analysis">Process Analysis</a></li>
+            <li><a href="#" data-page="testbed">Test Bed</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <!-- Data Input Section -->
+        <section id="upload" class="page active">
+            <h2>Data Input</h2>
+            <div class="upload-container">
+                <div class="file-upload">
+                    <h3>File Upload</h3>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx">
+                    <button onclick="handleFileUpload()">Upload File</button>
+                </div>
+                <div class="api-integration">
+                    <h3>CRM/ERP Integration</h3>
+                    <form id="apiForm">
+                        <select id="systemType">
+                            <option value="salesforce">Salesforce</option>
+                            <option value="sap">SAP</option>
+                        </select>
+                        <input type="text" placeholder="API Key" id="apiKey">
+                        <button type="submit">Connect</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other sections will be hidden by default -->
+        <section id="visualization" class="page">
+            <h2>Workflow Visualization</h2>
+            <div class="workflow-container">
+                <canvas id="workflowCanvas"></canvas>
+                <div class="controls">
+                    <button onclick="zoomIn()">Zoom In</button>
+                    <button onclick="zoomOut()">Zoom Out</button>
+                    <button onclick="resetView()">Reset</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/visualization.js"></script>
+</body>
+</html>

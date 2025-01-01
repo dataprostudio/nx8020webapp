@@ -1,0 +1,104 @@
+Product Requirements Document (PRD)
+
+Product Overview
+
+Product Name: Process Mining Web App
+Objective:
+    •    Analyze workflows to identify bottlenecks and waste.
+    •    Provide optimized workflow suggestions using an LLM model.
+    •    Enable interactive visualization of workflows.
+    •    Implement a test bed for curated optimized processes.
+
+Target Users:
+    •    Businesses using CRM/ERP systems seeking to optimize operations.
+    •    Operations managers and analysts.
+    •    IT teams working on process efficiency.
+
+Key Features
+
+1. Data Input
+    •    File Upload:
+    •    Users can upload flat files (e.g., CSV, Excel) containing process logs.
+    •    Validate and display uploaded data.
+    •    Real-Time Integration:
+    •    Pull data from CRM/ERP systems via APIs (e.g., Salesforce, SAP).
+    •    Configure API connection with user-provided credentials.
+
+2. Workflow Visualization
+    •    Generate interactive workflow diagrams:
+    •    Use nodes for tasks and edges for transitions.
+    •    Color-coded nodes and edges to highlight bottlenecks and waste.
+    •    Zoom, pan, and node exploration features.
+
+3. Process Analysis
+    •    Leverage a quantized version of Llama 3.2 for:
+    •    Workflow parsing and analysis.
+    •    Identification of bottlenecks and redundant tasks.
+    •    Recommendations for optimized processes.
+
+4. Test Bed Implementation
+    •    Provide a sandbox to simulate and validate suggested workflows.
+    •    Track metrics (e.g., time saved, cost efficiency) before actual implementation.
+
+5. Database Management
+    •    PostgreSQL:
+    •    Store uploaded files and analysis results.
+    •    Maintain historical data for comparative analysis.
+
+Technical Requirements
+
+Frontend
+    •    Technologies: HTML, CSS, JavaScript.
+    •    Features:
+    •    Responsive design for desktop and mobile devices.
+    •    Intuitive UI for file uploads and API integration setup.
+
+Backend
+    •    Technologies: Node.js with Flask or NGROK for API tunneling.
+    •    Responsibilities:
+    •    Handle file uploads and API requests.
+    •    Integrate with the LLM model and process results.
+
+Database
+    •    PostgreSQL setup with:
+    •    Tables for user data, uploaded files, analysis results, and workflow simulations.
+
+LLM Integration
+    •    Utilize the quantized version of Llama 3.2 to:
+    •    Parse log files and API data.
+    •    Identify inefficiencies and recommend optimizations.
+    •    Connect to the model via a Python Flask API.
+
+User Stories
+
+As a user, I want to:
+    1.    Upload my process logs and view a visual representation of workflows.
+    2.    Integrate my CRM/ERP system to analyze real-time data.
+    3.    Identify bottlenecks and redundant tasks in my workflow.
+    4.    Receive actionable recommendations to optimize processes.
+    5.    Simulate optimized workflows in a test environment.
+
+Milestones
+
+Phase 1: MVP Development
+    1.    Set up file upload and validation.
+    2.    Create basic workflow visualization.
+    3.    Implement Llama 3.2 integration for static file analysis.
+    4.    Deploy Flask backend with NGROK for local testing.
+
+Phase 2: Real-Time Integration
+    1.    Develop API connectors for CRM/ERP systems.
+    2.    Expand visualization for real-time workflows.
+
+Phase 3: Test Bed and Metrics
+    1.    Build sandbox for workflow simulation.
+    2.    Integrate metrics tracking and reporting.
+
+Phase 4: Deployment
+    1.    Deploy to production with Docker.
+    2.    Perform extensive user testing.
+
+Success Metrics
+    •    Accuracy: High precision in identifying bottlenecks.
+    •    Performance: Fast analysis for files under 100 MB.
+    •    User Satisfaction: Positive feedback from at least 90% of test users.
