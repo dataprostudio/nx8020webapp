@@ -66,7 +66,13 @@ window.updateVisualization = function(data) {
     console.log('Updating visualization with data:', data);
     try {
         if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
+            console.error('Invalid data format:', data);
             throw new Error('Invalid data format');
+        }
+
+        if (data.nodes.length === 0 || data.edges.length === 0) {
+            console.error('Empty data received');
+            throw new Error('No valid data to visualize');
         }
 
         // Clear existing data
@@ -82,7 +88,7 @@ window.updateVisualization = function(data) {
         nodes = data.nodes.map((node, index) => {
             const angle = (index / data.nodes.length) * Math.PI * 2;
             return {
-                id: node,
+                id: String(node), // Ensure node ID is string
                 x: centerX + Math.cos(angle) * radius,
                 y: centerY + Math.sin(angle) * radius,
                 radius: 30
@@ -90,7 +96,10 @@ window.updateVisualization = function(data) {
         });
         
         // Set edges
-        edges = data.edges;
+        edges = data.edges.map(edge => ({
+            source: String(edge.source), // Ensure source is string
+            target: String(edge.target)  // Ensure target is string
+        }));
         
         // Reset view and redraw
         scale = 1;
@@ -100,6 +109,10 @@ window.updateVisualization = function(data) {
     } catch (error) {
         console.error('Error updating visualization:', error);
         alert('Error updating visualization: ' + error.message);
+        // Ensure we still have something to show
+        nodes = [];
+        edges = [];
+        drawWorkflow();
     }
 };
 

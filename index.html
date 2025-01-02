@@ -61,18 +61,19 @@
                 <div class="metrics-panel">
                     <h3>Process Metrics</h3>
                     <div class="metric-card">
-                        <h4>Average Cycle Time</h4>
-                        <div class="metric-value" id="cycletime">--</div>
+                        <h4>Average Cycle Time <span class="info-icon">i</span>
+                        <div class="tooltip">Average time taken for a process to complete from start to finish, measured in days.</div></h4>
+                        <div class="metric-value" id="cycletime" data-metric="cycletime">--</div>
                     </div>
                     <div class="metric-card">
-                        <h4>Process Variants <span class="info-icon">ⓘ</span></h4>
+                        <h4>Process Variants <span class="info-icon">i</span>
+                        <div class="tooltip">Number of unique process paths from start to end. Higher numbers indicate more variation in how processes are executed.</div></h4>
                         <div class="metric-value" id="variants">--</div>
-                        <div class="tooltip">Number of unique process paths from start to end. Higher numbers indicate more variation in how processes are executed.</div>
                     </div>
                     <div class="metric-card">
-                        <h4>Bottlenecks <span class="info-icon">ⓘ</span></h4>
+                        <h4>Bottlenecks <span class="info-icon">i</span>
+                        <div class="tooltip">Number of identified process steps where significant delays or resource constraints occur, causing workflow slowdowns.</div></h4>
                         <div class="metric-value" id="bottlenecks">--</div>
-                        <div class="tooltip">Number of identified process steps where significant delays or resource constraints occur, causing workflow slowdowns.</div>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -80,6 +81,18 @@
                 </div>
             </div>
         </section>
+
+        <div id="metricModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Metric Breakdown</h3>
+                    <span class="modal-close">&times;</span>
+                </div>
+                <div id="modalContent">
+                    <ul class="breakdown-list" id="breakdownList"></ul>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Update script loading order -->

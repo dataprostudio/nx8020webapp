@@ -101,6 +101,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (analysisPage) {
         analysisPage.addEventListener('shown', initializeAnalysis);
     }
+
+    // Add tooltip handlers
+    const infoIcons = document.querySelectorAll('.info-icon');
+    const tooltips = document.querySelectorAll('.tooltip');
+
+    // Hide all tooltips when clicking anywhere on the document
+    document.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('info-icon')) {
+            tooltips.forEach(tooltip => tooltip.classList.remove('show'));
+        }
+    });
+
+    // Show tooltip on info icon click
+    infoIcons.forEach(icon => {
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const tooltip = e.target.nextElementSibling;
+            
+            // Hide all other tooltips
+            tooltips.forEach(t => {
+                if (t !== tooltip) t.classList.remove('show');
+            });
+            
+            // Toggle current tooltip
+            tooltip.classList.toggle('show');
+        });
+    });
 });
 
 function handleFileUpload() {
@@ -112,57 +139,77 @@ function handleFileUpload() {
         return;
     }
 
-    console.log('Uploading file:', file.name, 'Type:', file.type);
+    // Add loading indication
+    const uploadButton = document.getElementById('uploadButton');
+    if (uploadButton) {
+        uploadButton.disabled = true;
+        uploadButton.textContent = 'Processing...';
+    }
 
-    // Process file directly without server upload
-    processFileData(file);
+    // Use setTimeout to prevent UI blocking
+    setTimeout(() => {
+        try {
+            console.log('Uploading file:', file.name, 'Type:', file.type);
+            processFileData(file);
+        } catch (error) {
+            console.error('Error processing file:', error);
+            alert('Error processing file: ' + error.message);
+        } finally {
+            // Reset button state
+            if (uploadButton) {
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Upload File';
+            }
+        }
+    }, 100);
 }
 
 function processFileData(file) {
-    console.log('Processing file:', file.name);
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        console.log('File read completed');
-        const data = e.target.result;
-        let parsedData;
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
         
-        try {
-            if (file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')) {
-                parsedData = parseCSVData(data);
-            } else if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-                parsedData = parseTextData(data);
-            } else {
-                throw new Error('Unsupported file type');
-            }
-            
-            if (!parsedData || !parsedData.nodes || !parsedData.edges) {
-                throw new Error('Invalid data format');
-            }
+        reader.onload = function(e) {
+            try {
+                console.log('File read completed');
+                const data = e.target.result;
+                let parsedData;
+                
+                if (file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')) {
+                    parsedData = parseCSVData(data);
+                } else if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+                    parsedData = parseTextData(data);
+                } else {
+                    throw new Error('Unsupported file type');
+                }
+                
+                if (!parsedData || !parsedData.nodes || !parsedData.edges) {
+                    throw new Error('Invalid data format');
+                }
 
-            console.log('Parsed data:', parsedData);
-            
-            // Update visualization with slight delay to allow UI to update
-            setTimeout(() => {
+                console.log('Parsed data:', parsedData);
+                
+                // Update visualization
                 if (window.updateVisualization) {
                     window.updateVisualization(parsedData);
                     alert('File processed successfully');
                 } else {
                     throw new Error('Visualization component not ready');
                 }
-            }, 100);
-        } catch (error) {
-            console.error('Error processing file:', error);
-            alert('Error processing file: ' + error.message);
-        }
-    };
+                
+                resolve(parsedData);
+            } catch (error) {
+                console.error('Error processing file:', error);
+                reject(error);
+            }
+        };
 
-    reader.onerror = function(error) {
-        console.error('Error reading file:', error);
-        alert('Error reading file');
-    };
+        reader.onerror = function(error) {
+            console.error('Error reading file:', error);
+            reject(new Error('Error reading file'));
+        };
 
-    reader.readAsText(file);
+        reader.readAsText(file);
+    });
 }
 
 function parseTextData(data) {
@@ -195,32 +242,48 @@ function parseTextData(data) {
 }
 
 function parseCSVData(data) {
-    const lines = data.split('\n');
-    const nodes = new Set();
-    const edges = [];
-    
-    // Skip header and process in chunks
-    const chunkSize = 1000;
-    for (let i = 1; i < lines.length; i += chunkSize) {
-        const chunk = lines.slice(i, Math.min(i + chunkSize, lines.length));
-        chunk.forEach(line => {
-            const parts = line.split(',');
+    try {
+        const lines = data.split(/\r?\n/).filter(line => line.trim()); // Handle different line endings and empty lines
+        if (lines.length === 0) {
+            throw new Error('CSV file is empty');
+        }
+
+        const nodes = new Set();
+        const edges = [];
+        
+        // Process all lines (including header) as potential node connections
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            // Handle quoted CSV values properly
+            let parts = line.split(',').map(part => part.trim().replace(/^["']|["']$/g, ''));
+            
+            // Ensure we have at least source and target
             if (parts.length >= 2) {
-                const source = parts[0].trim();
-                const target = parts[1].trim();
+                const source = parts[0];
+                const target = parts[1];
+                
                 if (source && target) {
                     nodes.add(source);
                     nodes.add(target);
                     edges.push({ source, target });
                 }
             }
-        });
+        }
+
+        if (nodes.size === 0 || edges.length === 0) {
+            throw new Error('No valid data found in CSV');
+        }
+
+        return {
+            nodes: Array.from(nodes),
+            edges: edges
+        };
+    } catch (error) {
+        console.error('CSV parsing error:', error);
+        throw new Error('Failed to parse CSV: ' + error.message);
     }
-    
-    return {
-        nodes: Array.from(nodes),
-        edges: edges
-    };
 }
 
 function processCSVData(csvData) {
@@ -258,41 +321,134 @@ function initializeAnalysis() {
     
     // Sample data - in production, this would come from your data processing
     const metrics = {
-        cycleTime: '2.5 days',
-        variants: '8',
-        bottlenecks: '3'
-    };
-
-    // Update the metric values
-    const elements = {
-        cycletime: document.getElementById('cycletime'),
-        variants: document.getElementById('variants'),
-        bottlenecks: document.getElementById('bottlenecks')
-    };
-
-    Object.entries(elements).forEach(([key, element]) => {
-        if (element && metrics[key]) {
-            element.textContent = metrics[key];
-            console.log(`Updated ${key} to ${metrics[key]}`);
-        } else {
-            console.error(`Could not update ${key} metric`);
+        cycleTime: {
+            value: '2.5 days',
+            breakdowns: [
+                {
+                    process: 'Order Processing',
+                    subprocess: 'Credit Check',
+                    value: '0.8 days',
+                    details: 'Significant delay in credit verification'
+                },
+                {
+                    process: 'Fulfillment',
+                    subprocess: 'Picking',
+                    value: '1.2 days',
+                    details: 'Resource constraints during peak hours'
+                },
+                {
+                    process: 'Shipping',
+                    subprocess: 'Documentation',
+                    value: '0.5 days',
+                    details: 'Manual processing bottleneck'
+                }
+            ]
+        },
+        variants: {
+            value: '8',
+            breakdowns: [
+                {
+                    process: 'Order Entry',
+                    subprocess: 'Channel Selection',
+                    value: '3 variants',
+                    details: 'Multiple entry points causing process variation'
+                },
+                {
+                    process: 'Payment Processing',
+                    subprocess: 'Payment Method',
+                    value: '5 variants',
+                    details: 'Different payment methods leading to varied paths'
+                }
+            ]
+        },
+        bottlenecks: {
+            value: '3',
+            breakdowns: [
+                {
+                    process: 'Quality Control',
+                    subprocess: 'Initial Check',
+                    value: 'High Impact',
+                    details: 'Limited QC staff during afternoon shift'
+                },
+                {
+                    process: 'Packaging',
+                    subprocess: 'Material Selection',
+                    value: 'Medium Impact',
+                    details: 'Manual decision making causing delays'
+                },
+                {
+                    process: 'Shipping',
+                    subprocess: 'Label Generation',
+                    value: 'Low Impact',
+                    details: 'System performance issues'
+                }
+            ]
         }
+    };
+
+    // Update metrics display
+    updateMetrics(metrics);
+
+    // Initialize click handlers for metric values
+    initializeMetricClickHandlers(metrics);
+}
+
+function initializeMetricClickHandlers(metrics) {
+    const metricValues = document.querySelectorAll('.metric-value');
+    const modal = document.getElementById('metricModal');
+    const modalClose = document.querySelector('.modal-close');
+    const modalTitle = document.getElementById('modalTitle');
+    const breakdownList = document.getElementById('breakdownList');
+
+    metricValues.forEach(metric => {
+        metric.addEventListener('click', () => {
+            const metricType = metric.getAttribute('data-metric');
+            if (!metrics[metricType]) return;
+
+            modalTitle.textContent = `${toTitleCase(metricType)} Breakdown`;
+            
+            breakdownList.innerHTML = metrics[metricType].breakdowns.map(item => `
+                <li class="breakdown-item">
+                    <div class="breakdown-header">
+                        <span>${item.process} > ${item.subprocess}</span>
+                        <span>${item.value}</span>
+                    </div>
+                    <div class="breakdown-details">${item.details}</div>
+                </li>
+            `).join('');
+
+            modal.style.display = 'block';
+        });
     });
 
-    // Initialize the analysis chart if needed
-    const chartCanvas = document.getElementById('analysisChart');
-    if (chartCanvas) {
-        // Add your chart initialization here
-        console.log('Chart canvas found, ready for visualization');
-    }
+    // Close modal handlers
+    modalClose.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+function toTitleCase(str) {
+    return str.replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase())
+        .trim();
 }
 
 function updateMetrics(data) {
-    const cycleTimeElement = document.getElementById('cycletime');
-    const variantsElement = document.getElementById('variants');
-    const bottlenecksElement = document.getElementById('bottlenecks');
-
-    if (cycleTimeElement) cycleTimeElement.textContent = data.cycleTime;
-    if (variantsElement) variantsElement.textContent = data.variants;
-    if (bottlenecksElement) bottlenecksElement.textContent = data.bottlenecks;
+    Object.entries({
+        cycletime: data.cycleTime.value,
+        variants: data.variants.value,
+        bottlenecks: data.bottlenecks.value
+    }).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+            element.setAttribute('data-metric', id);
+        }
+    });
 }
