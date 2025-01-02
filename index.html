@@ -24,8 +24,8 @@
             <div class="upload-container">
                 <div class="file-upload">
                     <h3>File Upload</h3>
-                    <input type="file" id="fileInput" accept=".csv,.xlsx">
-                    <button onclick="handleFileUpload()">Upload File</button>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.txt,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                    <button id="uploadButton">Upload File</button>
                 </div>
                 <div class="api-integration">
                     <h3>CRM/ERP Integration</h3>
@@ -47,9 +47,9 @@
             <div class="workflow-container">
                 <canvas id="workflowCanvas"></canvas>
                 <div class="controls">
-                    <button onclick="zoomIn()">Zoom In</button>
-                    <button onclick="zoomOut()">Zoom Out</button>
-                    <button onclick="resetView()">Reset</button>
+                    <button id="zoomInButton">Zoom In</button>
+                    <button id="zoomOutButton">Zoom Out</button>
+                    <button id="resetButton">Reset</button>
                 </div>
             </div>
         </section>

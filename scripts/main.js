@@ -1,35 +1,62 @@
 // Navigation handling
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up navigation links
+    // Set up navigation links with more debugging
     const navLinks = document.querySelectorAll('.nav-links a');
+    console.log('Navigation links found:', navLinks.length);
+    
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Nav link clicked:', this.getAttribute('data-page'));
             
             // Remove active class from all links and pages
             navLinks.forEach(l => l.classList.remove('active'));
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+                console.log('Removing active from:', page.id);
+            });
             
             // Add active class to clicked link
             this.classList.add('active');
             
             // Show corresponding page
             const pageId = this.getAttribute('data-page');
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                console.log('Activated page:', pageId);
+            } else {
+                console.error('Could not find page:', pageId);
+            }
         });
     });
 
-    // Add file upload event listeners
-    const uploadButton = document.querySelector('.file-upload button');
-    if (uploadButton) {
-        uploadButton.addEventListener('click', handleFileUpload);
-    }
-
-    // Add direct file input change listener
+    // File upload handling with more debugging
+    const uploadButton = document.getElementById('uploadButton');
     const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
+
+    if (uploadButton && fileInput) {
+        console.log('Upload elements found');
+        
+        uploadButton.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent any default button behavior
+            console.log('Upload button clicked');
+            if (fileInput.files.length > 0) {
+                console.log('File selected:', fileInput.files[0].name);
+                handleFileUpload();
+            } else {
+                console.log('No file selected');
+                alert('Please select a file first');
+            }
+        });
+
         fileInput.addEventListener('change', function(e) {
-            console.log('File selected:', e.target.files[0]?.name);
+            console.log('File input changed:', this.files[0]?.name);
+        });
+    } else {
+        console.error('Upload elements not found:', {
+            uploadButton: !!uploadButton,
+            fileInput: !!fileInput
         });
     }
 
@@ -47,44 +74,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Handle API connection
             connectToSystem(systemType, apiKey);
         });
     }
+
+    // Visualization controls
+    const zoomInButton = document.getElementById('zoomInButton');
+    const zoomOutButton = document.getElementById('zoomOutButton');
+    const resetButton = document.getElementById('resetButton');
+
+    if (zoomInButton) zoomInButton.addEventListener('click', zoomIn);
+    if (zoomOutButton) zoomOutButton.addEventListener('click', zoomOut);
+    if (resetButton) resetButton.addEventListener('click', resetView);
 });
 
-// File upload handling
 function handleFileUpload() {
     console.log('handleFileUpload function called');
     const fileInput = document.getElementById('fileInput');
     console.log('fileInput element:', fileInput);
-    const file = fileInput.files[0];
+    console.log('files:', fileInput?.files);
+    
+    const file = fileInput?.files[0];
     
     if (!file) {
         alert('Please select a file first');
         return;
     }
 
-    // Handle different file types
-    if (file.name.endsWith('.csv')) {
-        // Handle CSV file
+    console.log('Processing file:', file.name);
+
+    if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const csvData = e.target.result;
-            processCSVData(csvData);
+            console.log('File read successfully');
+            const fileData = e.target.result;
+            processCSVData(fileData);
         };
+        reader.onerror = function(e) {
+            console.error('Error reading file:', e);
+            alert('Error reading file');
+        };
+        console.log('Starting to read file...');
         reader.readAsText(file);
     } else if (file.name.endsWith('.xlsx')) {
-        // Handle Excel file
         handleExcelFile(file);
     } else {
-        alert('Unsupported file type. Please upload a CSV or XLSX file.');
+        alert('Unsupported file type. Please upload a CSV, TXT, or XLSX file.');
     }
 }
 
 function processCSVData(csvData) {
     try {
-        // Split the CSV data into rows
         const rows = csvData.split('\n');
         const headers = rows[0].split(',');
         const data = rows.slice(1).map(row => {
@@ -98,7 +138,6 @@ function processCSVData(csvData) {
 
         console.log('Processed CSV data:', data);
         // Store the data or update the visualization
-        // You can add your data processing logic here
     } catch (error) {
         console.error('Error processing CSV:', error);
         alert('Error processing CSV file. Please check the file format.');
@@ -107,30 +146,21 @@ function processCSVData(csvData) {
 
 function handleExcelFile(file) {
     alert('Excel file support requires additional libraries. Please use CSV format for now.');
-    // If you want to add Excel support, you can use libraries like SheetJS
-    // Example implementation with SheetJS would go here
 }
 
-// API Integration handling
 function connectToSystem(systemType, apiKey) {
     console.log(`Connecting to ${systemType} with key ${apiKey}`);
-    // Add your API connection logic here
-    // This is where you would make API calls to your backend
     alert(`Attempting to connect to ${systemType}...`);
 }
 
-// Visualization controls
 function zoomIn() {
-    // Add zoom in logic for the workflow visualization
     console.log('Zoom in');
 }
 
 function zoomOut() {
-    // Add zoom out logic for the workflow visualization
     console.log('Zoom out');
 }
 
 function resetView() {
-    // Add reset view logic for the workflow visualization
     console.log('Reset view');
 }
