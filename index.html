@@ -11,16 +11,16 @@
     <nav class="sidebar">
         <div class="logo">Process Mining</div>
         <ul class="nav-links">
-            <li><a href="#" class="active" data-page="upload">Data Input</a></li>
-            <li><a href="#" data-page="visualization">Workflow Visualization</a></li>
-            <li><a href="#" data-page="analysis">Process Analysis</a></li>
-            <li><a href="#" data-page="testbed">Test Bed</a></li>
+            <li><a href="#upload" data-page="upload">Data Input</a></li>
+            <li><a href="#visualization" data-page="visualization">Workflow Visualization</a></li>
+            <li><a href="#analysis" data-page="analysis">Process Analysis</a></li>
+            <li><a href="#testbed" data-page="testbed">Test Bed</a></li>
         </ul>
     </nav>
 
     <main class="content">
         <!-- Data Input Section -->
-        <section id="upload" class="page active">
+        <section id="upload" class="page">
             <h2>Data Input</h2>
             <div class="upload-container">
                 <div class="file-upload">
@@ -95,8 +95,71 @@
         </div>
     </main>
 
-    <!-- Update script loading order -->
-    <script src="scripts/visualization.js"></script>
-    <script src="scripts/main.js"></script>
+    <!-- Update script loading order and add improved error handling -->
+    <script>
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.message, e.filename, e.lineno);
+            // Prevent alert spam
+            if (!window.hasAlerted) {
+                window.hasAlerted = true;
+                alert('An error occurred: ' + e.message);
+            }
+        });
+
+        // Load scripts sequentially with error handling and retry
+        async function loadScript(src, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = src;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.body.appendChild(script);
+                    });
+                    return;
+                } catch (error) {
+                    console.error(`Failed to load ${src}, attempt ${i + 1}/${retries}`);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        // Initialize application components
+        async function initializeApp() {
+            try {
+                await loadScript('scripts/visualization.js');
+                await loadScript('scripts/main.js');
+                
+                // Initialize the current page
+                const currentPage = window.location.hash.slice(1) || 'upload';
+                const pageElement = document.getElementById(currentPage);
+                
+                if (pageElement) {
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    pageElement.classList.add('active');
+                    
+                    // Initialize page-specific components
+                    if (currentPage === 'visualization' && window.initializeVisualization) {
+                        window.initializeVisualization();
+                    } else if (currentPage === 'analysis') {
+                        initializeAnalysis();
+                    }
+                }
+            } catch (error) {
+                console.error('Application initialization error:', error);
+                alert('Failed to initialize application. Please refresh the page.');
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+    </script>
 </body>
 </html>

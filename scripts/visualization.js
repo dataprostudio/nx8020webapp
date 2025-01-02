@@ -65,82 +65,107 @@ const defaultData = {
 window.updateVisualization = function(data) {
     console.log('Updating visualization with data:', data);
     try {
+        // Validate input data
         if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
-            console.error('Invalid data format:', data);
             throw new Error('Invalid data format');
         }
 
-        if (data.nodes.length === 0 || data.edges.length === 0) {
-            console.error('Empty data received');
-            throw new Error('No valid data to visualize');
-        }
+        // Store the data globally to prevent reset
+        window.currentVisualizationData = data;
 
-        // Clear existing data
+        // Reset canvas state
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Reset existing data
         nodes = [];
         edges = [];
         
-        // Calculate positions in a circle layout
-        const centerX = canvas.width / (2 * scale);
-        const centerY = canvas.height / (2 * scale);
-        const radius = Math.min(canvas.width, canvas.height) / (4 * scale);
+        // Add safety checks and limit data size
+        const maxNodes = 500;
+        if (data.nodes.length > maxNodes) {
+            console.warn(`Large dataset detected. Limiting to ${maxNodes} nodes.`);
+            data.nodes = data.nodes.slice(0, maxNodes);
+            data.edges = data.edges.filter(edge => 
+                data.nodes.includes(edge.source) && data.nodes.includes(edge.target)
+            );
+        }
+
+        // Create nodes with improved positioning
+        const spacing = Math.min(
+            canvas.width / (2 * Math.sqrt(data.nodes.length)),
+            canvas.height / (2 * Math.sqrt(data.nodes.length))
+        );
         
-        // Create nodes with positions
+        const columns = Math.ceil(Math.sqrt(data.nodes.length));
         nodes = data.nodes.map((node, index) => {
-            const angle = (index / data.nodes.length) * Math.PI * 2;
+            const row = Math.floor(index / columns);
+            const col = index % columns;
             return {
-                id: String(node), // Ensure node ID is string
-                x: centerX + Math.cos(angle) * radius,
-                y: centerY + Math.sin(angle) * radius,
-                radius: 30
+                id: String(node),
+                x: (col * spacing * 2) + spacing,
+                y: (row * spacing * 2) + spacing,
+                radius: Math.max(20, Math.min(30, 200 / Math.sqrt(data.nodes.length)))
             };
         });
         
-        // Set edges
-        edges = data.edges.map(edge => ({
-            source: String(edge.source), // Ensure source is string
-            target: String(edge.target)  // Ensure target is string
-        }));
+        edges = data.edges;
         
-        // Reset view and redraw
-        scale = 1;
+        // Reset view and scale to fit
+        scale = Math.min(
+            canvas.width / ((columns + 1) * spacing * 2),
+            canvas.height / ((Math.ceil(nodes.length / columns) + 1) * spacing * 2)
+        );
+        
         drawWorkflow();
         
         console.log('Visualization updated successfully');
     } catch (error) {
-        console.error('Error updating visualization:', error);
-        alert('Error updating visualization: ' + error.message);
-        // Ensure we still have something to show
-        nodes = [];
-        edges = [];
-        drawWorkflow();
+        console.error('Visualization update error:', error);
     }
 };
 
-// Make initialization function globally accessible
-window.initializeVisualization = function() {
+// Update canvas setup with better error handling
+function initCanvas() {
     const canvas = document.getElementById('workflowCanvas');
     if (!canvas) {
-        console.error('Canvas element not found!');
-        return;
+        console.error('Canvas element not found, deferring initialization');
+        return null;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-        console.error('Could not get canvas context!');
-        return;
+        console.error('Could not get canvas context');
+        return null;
     }
 
-    // Reset state
-    scale = 1;
-    nodes = [];
-    edges = [];
-    isDragging = false;
-    selectedNode = null;
-    offset = { x: 0, y: 0 };
+    // Ensure proper dimensions
+    const container = canvas.parentElement;
+    if (container) {
+        canvas.width = container.clientWidth;
+        canvas.height = Math.max(400, container.clientHeight);
+    }
 
-    // Initialize with default data
-    resizeCanvas();
-    updateVisualization(defaultData);
+    return { canvas, ctx };
+}
+
+// Update the window.initializeVisualization function
+window.initializeVisualization = function() {
+    try {
+        const setup = initCanvas();
+        if (!setup) {
+            console.log('Deferring visualization initialization');
+            return;
+        }
+
+        // Only initialize with default data if no current data exists
+        if (!window.currentVisualizationData && document.querySelector('.page.active#visualization')) {
+            updateVisualization(defaultData);
+        } else if (window.currentVisualizationData) {
+            updateVisualization(window.currentVisualizationData);
+        }
+    } catch (error) {
+        console.error('Visualization initialization error:', error);
+    }
 };
 
 // Replace the drawWorkflow function
