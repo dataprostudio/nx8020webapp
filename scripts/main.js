@@ -25,6 +25,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetPage) {
                 targetPage.classList.add('active');
                 console.log('Activated page:', pageId);
+                
+                // Initialize visualization when switching to visualization tab
+                if (pageId === 'visualization' && window.initializeVisualization) {
+                    window.initializeVisualization();
+                }
+                // Initialize analysis when switching to analysis tab
+                if (pageId === 'analysis') {
+                    initializeAnalysis();
+                }
             } else {
                 console.error('Could not find page:', pageId);
             }
@@ -83,44 +92,135 @@ document.addEventListener('DOMContentLoaded', function() {
     const zoomOutButton = document.getElementById('zoomOutButton');
     const resetButton = document.getElementById('resetButton');
 
-    if (zoomInButton) zoomInButton.addEventListener('click', zoomIn);
-    if (zoomOutButton) zoomOutButton.addEventListener('click', zoomOut);
-    if (resetButton) resetButton.addEventListener('click', resetView);
+    if (zoomInButton) zoomInButton.addEventListener('click', () => window.zoomIn());
+    if (zoomOutButton) zoomOutButton.addEventListener('click', () => window.zoomOut());
+    if (resetButton) resetButton.addEventListener('click', () => window.resetView());
+
+    // Process Analysis initialization
+    const analysisPage = document.getElementById('analysis');
+    if (analysisPage) {
+        analysisPage.addEventListener('shown', initializeAnalysis);
+    }
 });
 
 function handleFileUpload() {
-    console.log('handleFileUpload function called');
     const fileInput = document.getElementById('fileInput');
-    console.log('fileInput element:', fileInput);
-    console.log('files:', fileInput?.files);
-    
-    const file = fileInput?.files[0];
+    const file = fileInput.files[0];
     
     if (!file) {
         alert('Please select a file first');
         return;
     }
 
-    console.log('Processing file:', file.name);
+    console.log('Uploading file:', file.name, 'Type:', file.type);
 
-    if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            console.log('File read successfully');
-            const fileData = e.target.result;
-            processCSVData(fileData);
-        };
-        reader.onerror = function(e) {
-            console.error('Error reading file:', e);
-            alert('Error reading file');
-        };
-        console.log('Starting to read file...');
-        reader.readAsText(file);
-    } else if (file.name.endsWith('.xlsx')) {
-        handleExcelFile(file);
-    } else {
-        alert('Unsupported file type. Please upload a CSV, TXT, or XLSX file.');
+    // Process file directly without server upload
+    processFileData(file);
+}
+
+function processFileData(file) {
+    console.log('Processing file:', file.name);
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        console.log('File read completed');
+        const data = e.target.result;
+        let parsedData;
+        
+        try {
+            if (file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')) {
+                parsedData = parseCSVData(data);
+            } else if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+                parsedData = parseTextData(data);
+            } else {
+                throw new Error('Unsupported file type');
+            }
+            
+            if (!parsedData || !parsedData.nodes || !parsedData.edges) {
+                throw new Error('Invalid data format');
+            }
+
+            console.log('Parsed data:', parsedData);
+            
+            // Update visualization with slight delay to allow UI to update
+            setTimeout(() => {
+                if (window.updateVisualization) {
+                    window.updateVisualization(parsedData);
+                    alert('File processed successfully');
+                } else {
+                    throw new Error('Visualization component not ready');
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error processing file:', error);
+            alert('Error processing file: ' + error.message);
+        }
+    };
+
+    reader.onerror = function(error) {
+        console.error('Error reading file:', error);
+        alert('Error reading file');
+    };
+
+    reader.readAsText(file);
+}
+
+function parseTextData(data) {
+    console.log('Parsing text data');
+    const lines = data.split('\n');
+    const nodes = new Set();
+    const edges = [];
+    
+    // Process in chunks for large files
+    const chunkSize = 1000;
+    for (let i = 0; i < lines.length; i += chunkSize) {
+        const chunk = lines.slice(i, i + chunkSize);
+        chunk.forEach(line => {
+            const parts = line.trim().split(/[\s,\t]+/);
+            if (parts.length >= 2) {
+                const [source, target] = parts;
+                if (source && target) {
+                    nodes.add(source);
+                    nodes.add(target);
+                    edges.push({ source, target });
+                }
+            }
+        });
     }
+    
+    return {
+        nodes: Array.from(nodes),
+        edges: edges
+    };
+}
+
+function parseCSVData(data) {
+    const lines = data.split('\n');
+    const nodes = new Set();
+    const edges = [];
+    
+    // Skip header and process in chunks
+    const chunkSize = 1000;
+    for (let i = 1; i < lines.length; i += chunkSize) {
+        const chunk = lines.slice(i, Math.min(i + chunkSize, lines.length));
+        chunk.forEach(line => {
+            const parts = line.split(',');
+            if (parts.length >= 2) {
+                const source = parts[0].trim();
+                const target = parts[1].trim();
+                if (source && target) {
+                    nodes.add(source);
+                    nodes.add(target);
+                    edges.push({ source, target });
+                }
+            }
+        });
+    }
+    
+    return {
+        nodes: Array.from(nodes),
+        edges: edges
+    };
 }
 
 function processCSVData(csvData) {
@@ -153,14 +253,46 @@ function connectToSystem(systemType, apiKey) {
     alert(`Attempting to connect to ${systemType}...`);
 }
 
-function zoomIn() {
-    console.log('Zoom in');
+function initializeAnalysis() {
+    console.log('Initializing analysis page');
+    
+    // Sample data - in production, this would come from your data processing
+    const metrics = {
+        cycleTime: '2.5 days',
+        variants: '8',
+        bottlenecks: '3'
+    };
+
+    // Update the metric values
+    const elements = {
+        cycletime: document.getElementById('cycletime'),
+        variants: document.getElementById('variants'),
+        bottlenecks: document.getElementById('bottlenecks')
+    };
+
+    Object.entries(elements).forEach(([key, element]) => {
+        if (element && metrics[key]) {
+            element.textContent = metrics[key];
+            console.log(`Updated ${key} to ${metrics[key]}`);
+        } else {
+            console.error(`Could not update ${key} metric`);
+        }
+    });
+
+    // Initialize the analysis chart if needed
+    const chartCanvas = document.getElementById('analysisChart');
+    if (chartCanvas) {
+        // Add your chart initialization here
+        console.log('Chart canvas found, ready for visualization');
+    }
 }
 
-function zoomOut() {
-    console.log('Zoom out');
-}
+function updateMetrics(data) {
+    const cycleTimeElement = document.getElementById('cycletime');
+    const variantsElement = document.getElementById('variants');
+    const bottlenecksElement = document.getElementById('bottlenecks');
 
-function resetView() {
-    console.log('Reset view');
+    if (cycleTimeElement) cycleTimeElement.textContent = data.cycleTime;
+    if (variantsElement) variantsElement.textContent = data.variants;
+    if (bottlenecksElement) bottlenecksElement.textContent = data.bottlenecks;
 }

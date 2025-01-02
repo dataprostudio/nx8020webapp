@@ -119,3 +119,77 @@ button:hover {
 .controls button {
     width: auto;
 }
+
+/* Process Analysis styles */
+.analysis-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.metrics-panel {
+    background: #f5f6fa;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.metric-card {
+    position: relative;
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.info-icon {
+    margin-left: 8px;
+    cursor: help;
+    color: #3498db;
+    font-size: 16px;
+}
+
+.tooltip {
+    visibility: hidden;
+    position: absolute;
+    background: #34495e;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 200px;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.metric-card:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.metric-value {
+    font-size: 24px;
+    color: #3498db;
+    font-weight: bold;
+    text-align: center;
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 400px;
+}

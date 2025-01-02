@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Process Mining Web App</title>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/workflow.css">
 </head>
 <body>
     <nav class="sidebar">
@@ -53,9 +54,36 @@
                 </div>
             </div>
         </section>
+
+        <section id="analysis" class="page">
+            <h2>Process Analysis</h2>
+            <div class="analysis-container">
+                <div class="metrics-panel">
+                    <h3>Process Metrics</h3>
+                    <div class="metric-card">
+                        <h4>Average Cycle Time</h4>
+                        <div class="metric-value" id="cycletime">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Process Variants <span class="info-icon">ⓘ</span></h4>
+                        <div class="metric-value" id="variants">--</div>
+                        <div class="tooltip">Number of unique process paths from start to end. Higher numbers indicate more variation in how processes are executed.</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Bottlenecks <span class="info-icon">ⓘ</span></h4>
+                        <div class="metric-value" id="bottlenecks">--</div>
+                        <div class="tooltip">Number of identified process steps where significant delays or resource constraints occur, causing workflow slowdowns.</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="analysisChart"></canvas>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <script src="scripts/main.js"></script>
+    <!-- Update script loading order -->
     <script src="scripts/visualization.js"></script>
+    <script src="scripts/main.js"></script>
 </body>
 </html>
