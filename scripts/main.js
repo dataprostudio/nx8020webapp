@@ -487,65 +487,107 @@ function initializeMetricClickHandlers(metrics) {
     const modalTitle = document.getElementById('modalTitle');
     const breakdownList = document.getElementById('breakdownList');
 
-    if (!modal || !modalClose || !modalTitle || !breakdownList) {
-        console.error('Required modal elements not found');
-        return;
-    }
-
-    // Add click handlers to each metric value element
     document.querySelectorAll('.metric-value').forEach(metric => {
         metric.addEventListener('click', async function() {
+            const metricType = this.id;
+            modalTitle.textContent = getMetricTitle(metricType);
+            modal.style.display = 'block';
+
             try {
-                modalTitle.textContent = 'Loading analysis...';
-                modal.style.display = 'block';
-                breakdownList.innerHTML = '<li class="breakdown-item">Analyzing process data...</li>';
+                const data = window.currentVisualizationData || { nodes: [], edges: [] };
+                let content = '';
 
-                const result = await analyzewithLLM({
-                    nodes: window.currentVisualizationData?.nodes || [],
-                    edges: window.currentVisualizationData?.edges || []
-                });
-
-                modalTitle.textContent = `Process Analysis Details`;
-                
-                if (result.fallback) {
-                    // Show static analysis if LLM fails
-                    const staticAnalysis = generateFallbackAnalysis(window.currentVisualizationData || { nodes: [], edges: [] });
-                    breakdownList.innerHTML = `
-                        <li class="breakdown-item">
-                            <div class="breakdown-header">
-                                <span>Static Analysis</span>
-                            </div>
-                            <div class="breakdown-details">${staticAnalysis.replace(/\n/g, '<br>')}</div>
-                        </li>`;
-                } else {
-                    breakdownList.innerHTML = `
-                        <li class="breakdown-item">
-                            <div class="breakdown-header">
-                                <span>Dynamic Analysis</span>
-                            </div>
-                            <div class="breakdown-details">${result.analysis}</div>
-                        </li>`;
+                switch(metricType) {
+                    case 'cycletime':
+                        content = generateCycleTimeAnalysis(data);
+                        break;
+                    case 'variants':
+                        content = generateVariantAnalysis(data);
+                        break;
+                    case 'bottlenecks':
+                        content = generateBottleneckAnalysis(data);
+                        break;
+                    default:
+                        content = 'No analysis available for this metric.';
                 }
-            } catch (error) {
-                console.error('Error displaying metric details:', error);
-                modalTitle.textContent = 'Analysis Error';
+
                 breakdownList.innerHTML = `
                     <li class="breakdown-item">
-                        <div class="breakdown-details">
-                            Unable to analyze process data. Using static analysis.
-                            <br><br>
-                            ${generateFallbackAnalysis(window.currentVisualizationData || { nodes: [], edges: [] }).replace(/\n/g, '<br>')}
-                        </div>
+                        <div class="breakdown-details">${content}</div>
                     </li>`;
+            } catch (error) {
+                console.error('Error displaying metric details:', error);
+                breakdownList.innerHTML = '<li class="breakdown-item">Error analyzing metric data.</li>';
             }
         });
     });
 
-    // Close modal handlers
     modalClose.addEventListener('click', () => modal.style.display = 'none');
     window.addEventListener('click', (e) => {
         if (e.target === modal) modal.style.display = 'none';
     });
+}
+
+function getMetricTitle(metricType) {
+    switch(metricType) {
+        case 'cycletime':
+            return 'Cycle Time Analysis';
+        case 'variants':
+            return 'Process Variants Analysis';
+        case 'bottlenecks':
+            return 'Bottleneck Analysis';
+        default:
+            return 'Process Analysis';
+    }
+}
+
+function generateCycleTimeAnalysis(data) {
+    const cycleTime = calculateCycleTime(data);
+    const paths = findAllPaths(data);
+    const minPath = Math.min(...paths.map(p => p.length));
+    const maxPath = Math.max(...paths.map(p => p.length));
+    
+    return `
+        <strong>Average Cycle Time: ${cycleTime}</strong><br><br>
+        Shortest Path: ${minPath} steps<br>
+        Longest Path: ${maxPath} steps<br>
+        Total Paths Analyzed: ${paths.length}<br><br>
+        This metric indicates the average number of steps required to complete the process.
+    `;
+}
+
+function generateVariantAnalysis(data) {
+    const paths = findAllPaths(data);
+    const variantCount = paths.length;
+    const commonPaths = paths.slice(0, 3);
+    
+    return `
+        <strong>Total Variants: ${variantCount}</strong><br><br>
+        Most Common Paths:<br>
+        ${commonPaths.map((path, i) => `${i + 1}. ${path.join(' → ')}`).join('<br>')}<br><br>
+        ${variantCount > 3 ? `And ${variantCount - 3} more variants...` : ''}
+    `;
+}
+
+function generateBottleneckAnalysis(data) {
+    const incomingEdges = {};
+    data.edges.forEach(edge => {
+        incomingEdges[edge.target] = (incomingEdges[edge.target] || 0) + 1;
+    });
+
+    const bottlenecks = Object.entries(incomingEdges)
+        .filter(([_, count]) => count > 1)
+        .sort(([_, a], [__, b]) => b - a)
+        .slice(0, 5);
+
+    return `
+        <strong>Identified Bottlenecks: ${bottlenecks.length}</strong><br><br>
+        Top Bottleneck Points:<br>
+        ${bottlenecks.map(([node, count]) => 
+            `• ${node}: ${count} incoming connections`
+        ).join('<br>')}<br><br>
+        These points may cause process delays and should be reviewed for optimization.
+    `;
 }
 
 // Update metrics with better error handling
@@ -567,49 +609,46 @@ function updateMetrics(data) {
     });
 }
 
+// Update analyzewithLLM with better error handling and optimization
 async function analyzewithLLM(data) {
     try {
-        // Validate input data
         if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
-            console.warn('Invalid data structure for analysis');
-            return generateFallbackAnalysis({
-                nodes: [],
-                edges: []
-            });
+            return generateFallbackAnalysis({ nodes: [], edges: [] });
         }
 
-        // Limit data size to prevent crashes
-        const truncatedData = {
-            nodes: data.nodes.slice(0, 1000),
-            edges: data.edges.slice(0, 2000)
-        };
-
-        // Generate basic metrics with safeguards
-        const basicMetrics = {
-            cycleTime: { 
-                value: calculateCycleTime(truncatedData) || '0.0',
-                breakdowns: []
-            },
-            variants: { 
-                value: calculateVariants(truncatedData) || '0',
-                breakdowns: []
-            },
-            bottlenecks: { 
-                value: identifyBottlenecks(truncatedData) || '0',
-                breakdowns: []
-            }
-        };
-
-        // Safe update of UI metrics
+        // Check server capabilities first
         try {
-            updateMetrics(basicMetrics);
-        } catch (uiError) {
-            console.error('Error updating metrics UI:', uiError);
+            const capabilitiesResponse = await fetch('/api/llm/capabilities', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            const capabilities = await capabilitiesResponse.json();
+            
+            if (!capabilities.gpuAvailable) {
+                console.warn('Server running in CPU-only mode - using simplified analysis');
+                return generateFallbackAnalysis(data);
+            }
+        } catch (error) {
+            console.warn('Failed to check LLM capabilities:', error);
+            return generateFallbackAnalysis(data);
         }
 
-        // LLM analysis with timeout and error handling
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+        // Limit data size more aggressively
+        const truncatedData = {
+            nodes: data.nodes.slice(0, 100), // Reduced from 1000
+            edges: data.edges.slice(0, 200)  // Reduced from 2000
+        };
+
+        // Use debouncing to prevent multiple simultaneous requests
+        if (window.analysisInProgress) {
+            console.log('Analysis already in progress, using cached result');
+            return window.lastAnalysisResult || generateFallbackAnalysis(truncatedData);
+        }
+
+        window.analysisInProgress = true;
 
         try {
             const response = await fetch('/api/llm/analyze', {
@@ -623,27 +662,23 @@ async function analyzewithLLM(data) {
                         nodeCount: truncatedData.nodes.length,
                         edgeCount: truncatedData.edges.length,
                         connections: truncatedData.edges
-                            .slice(0, 50)
-                            .map(e => `${e.source}->${e.target}`),
-                        timestamp: Date.now()
+                            .slice(0, 20) // Reduced from 50
+                            .map(e => `${e.source}->${e.target}`)
                     })
                 }),
-                signal: controller.signal
+                signal: AbortSignal.timeout(10000) // 10s timeout
             });
-
-            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 throw new Error(`Analysis failed: ${response.statusText}`);
             }
 
             const result = await response.json();
-            return result.fallback ? 
-                generateFallbackAnalysis(truncatedData) : 
-                result.analysis;
+            window.lastAnalysisResult = result;
+            return result;
 
-        } catch (fetchError) {
-            console.error('LLM analysis error:', fetchError);
+        } catch (error) {
+            console.warn('LLM analysis failed, using fallback:', error);
             return generateFallbackAnalysis(truncatedData);
         }
 
@@ -653,6 +688,8 @@ async function analyzewithLLM(data) {
             nodes: [],
             edges: []
         });
+    } finally {
+        window.analysisInProgress = false;
     }
 }
 
@@ -700,22 +737,34 @@ function findAllPaths(data) {
 }
 
 function generateFallbackAnalysis(data) {
-    // Calculate actual process metrics
-    const uniqueSources = new Set(data.edges.map(e => e.source));
-    const uniqueTargets = new Set(data.edges.map(e => e.target));
-    const avgConnectionsPerNode = data.edges.length / data.nodes.length;
-    const hasFeedbackLoops = data.edges.some(edge => 
-        data.edges.some(e2 => e2.source === edge.target && e2.target === edge.source)
-    );
+    try {
+        // Enhanced fallback analysis for CPU-only mode
+        const metrics = {
+            processSize: data.nodes.length,
+            connectionCount: data.edges.length,
+            uniqueSources: new Set(data.edges.map(e => e.source)).size,
+            uniqueTargets: new Set(data.edges.map(e => e.target)).size,
+            avgConnectionsPerNode: data.edges.length / (data.nodes.length || 1),
+            parallelPaths: data.nodes.filter(node => 
+                data.edges.filter(e => e.source === node).length > 1
+            ).length
+        };
 
-    return `Real-time Analysis:\n` +
-           `- Process contains ${data.nodes.length} unique steps\n` +
-           `- Found ${data.edges.length} distinct connections\n` +  // Fixed missing closing brace
-           `- Process type: ${hasFeedbackLoops ? 'Cyclic' : 'Linear'}\n` +
-           `- Start points: ${uniqueSources.size}\n` +
-           `- End points: ${uniqueTargets.size}\n` +
-           `- Average connections per step: ${avgConnectionsPerNode.toFixed(2)}\n` +
-           `- Process complexity score: ${Math.min(10, (avgConnectionsPerNode * 2).toFixed(1))}/10`;
+        const paths = findAllPaths(data);
+        const maxDepth = paths.length ? Math.max(...paths.map(p => p.length)) : 0;
+        
+        return `CPU Mode Analysis Results:\n` +
+               `- Process Steps: ${metrics.processSize}\n` +
+               `- Connections: ${metrics.connectionCount}\n` +
+               `- Entry Points: ${metrics.uniqueSources}\n` +
+               `- Exit Points: ${metrics.uniqueTargets}\n` +
+               `- Parallel Branches: ${metrics.parallelPaths}\n` +
+               `- Maximum Path Length: ${maxDepth}\n` +
+               `- Average Connections per Step: ${metrics.avgConnectionsPerNode.toFixed(2)}`;
+    } catch (error) {
+        console.error('Error in fallback analysis:', error);
+        return 'Basic Process Analysis: Unable to analyze structure. Please check input data.';
+    }
 }
 
 // Add these helper functions to calculate basic metrics

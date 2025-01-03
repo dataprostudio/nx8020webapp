@@ -62,17 +62,17 @@
                     <h3>Process Metrics</h3>
                     <div class="metric-card">
                         <h4>Average Cycle Time <span class="info-icon">i</span>
-                        <div class="tooltip">Average time taken for a process to complete from start to finish, measured in days.</div></h4>
+                        <div class="tooltip">Measures the average duration of process completion, factoring in parallel paths and process depth. Lower values indicate more efficient processes.</div></h4>
                         <div class="metric-value" id="cycletime" data-metric="cycletime">--</div>
                     </div>
                     <div class="metric-card">
                         <h4>Process Variants <span class="info-icon">i</span>
-                        <div class="tooltip">Number of unique process paths from start to end. Higher numbers indicate more variation in how processes are executed.</div></h4>
+                        <div class="tooltip">Identifies unique process execution paths. Higher numbers suggest more complex decision-making and potential optimization opportunities.</div></h4>
                         <div class="metric-value" id="variants">--</div>
                     </div>
                     <div class="metric-card">
                         <h4>Bottlenecks <span class="info-icon">i</span>
-                        <div class="tooltip">Number of identified process steps where significant delays or resource constraints occur, causing workflow slowdowns.</div></h4>
+                        <div class="tooltip">Highlights process steps with high incoming connections or sequential dependencies that may slow down workflow. Critical for process optimization.</div></h4>
                         <div class="metric-value" id="bottlenecks">--</div>
                     </div>
                 </div>

@@ -24,6 +24,29 @@ let lastDrawTime = 0;
 const FRAME_RATE = 60;
 const FRAME_INTERVAL = 1000 / FRAME_RATE;
 
+// Add new node type tracking
+const nodeTypes = {
+    MAIN: 'main',
+    SUB: 'sub'
+};
+
+// Add node state tracking
+let expandedNodes = new Set();
+
+// Add GPU detection and optimization
+const gpuInfo = {
+    supported: 'gpu' in navigator,
+    preferCanvas: false
+};
+
+// Add process visibility thresholds
+const visibilityConfig = {
+    maxVisibleNodes: 30,
+    maxVisibleEdges: 50,
+    minNodeSize: 20,
+    maxNodeSize: 40
+};
+
 // Set canvas size
 function resizeCanvas() {
     const container = canvas.parentElement;
@@ -90,27 +113,50 @@ window.updateVisualization = function(data) {
             );
         }
 
-        // Create nodes with improved positioning
+        // Identify main processes and subprocesses
+        const mainProcesses = data.nodes.filter(node => 
+            data.edges.some(edge => edge.source === node || edge.target === node)
+        );
+
+        nodes = mainProcesses.map(process => {
+            const node = createNode(process, nodeTypes.MAIN);
+            
+            // Find subprocesses connected only to this main process
+            const subprocesses = data.nodes.filter(subProc => 
+                !mainProcesses.includes(subProc) &&
+                data.edges.some(edge => 
+                    (edge.source === process && edge.target === subProc) ||
+                    (edge.source === subProc && edge.target === process)
+                )
+            );
+            
+            node.subprocesses = subprocesses.map(sub => ({
+                ...createNode(sub, nodeTypes.SUB),
+                parentId: node.id
+            }));
+
+            return node;
+        });
+
+        // Update edges to include only visible connections
+        edges = data.edges.filter(edge => 
+            nodes.some(n => n.id === edge.source || n.id === edge.target)
+        );
+
+        // Reset view and scale to fit
         const spacing = Math.min(
-            canvas.width / (2 * Math.sqrt(data.nodes.length)),
-            canvas.height / (2 * Math.sqrt(data.nodes.length))
+            canvas.width / (2 * Math.sqrt(nodes.length)),
+            canvas.height / (2 * Math.sqrt(nodes.length))
         );
         
-        const columns = Math.ceil(Math.sqrt(data.nodes.length));
-        nodes = data.nodes.map((node, index) => {
+        const columns = Math.ceil(Math.sqrt(nodes.length));
+        nodes.forEach((node, index) => {
             const row = Math.floor(index / columns);
             const col = index % columns;
-            return {
-                id: String(node),
-                x: (col * spacing * 2) + spacing,
-                y: (row * spacing * 2) + spacing,
-                radius: Math.max(20, Math.min(30, 200 / Math.sqrt(data.nodes.length)))
-            };
+            node.x = (col * spacing * 2) + spacing;
+            node.y = (row * spacing * 2) + spacing;
         });
         
-        edges = data.edges;
-        
-        // Reset view and scale to fit
         scale = Math.min(
             canvas.width / ((columns + 1) * spacing * 2),
             canvas.height / ((Math.ceil(nodes.length / columns) + 1) * spacing * 2)
@@ -124,7 +170,7 @@ window.updateVisualization = function(data) {
     }
 };
 
-// Update canvas setup with better error handling
+// Update canvas setup with better error handling and GPU optimization
 function initCanvas() {
     const canvas = document.getElementById('workflowCanvas');
     if (!canvas) {
@@ -132,10 +178,26 @@ function initCanvas() {
         return null;
     }
 
-    const ctx = canvas.getContext('2d');
+    let ctx;
+    if (gpuInfo.supported && !gpuInfo.preferCanvas) {
+        ctx = canvas.getContext('2d', {
+            alpha: false,
+            desynchronized: true,
+            willReadFrequently: false
+        });
+    } else {
+        ctx = canvas.getContext('2d');
+    }
+
     if (!ctx) {
         console.error('Could not get canvas context');
         return null;
+    }
+
+    // Enable hardware acceleration hints
+    ctx.imageSmoothingEnabled = true;
+    if ('imageSmoothingQuality' in ctx) {
+        ctx.imageSmoothingQuality = 'low';
     }
 
     // Ensure proper dimensions
@@ -184,25 +246,47 @@ function drawWorkflow() {
         ctx.save();
         ctx.scale(scale, scale);
 
-        // Draw edges with optimization
+        // Update visibility before drawing
+        updateNodeVisibility();
+
+        // Draw edges with visibility check
         ctx.beginPath();
         ctx.strokeStyle = '#666';
         edges.forEach(edge => {
+            if (!edge.visible) return;
             const sourceNode = nodes.find(n => n.id === edge.source);
             const targetNode = nodes.find(n => n.id === edge.target);
-            if (sourceNode && targetNode) {
+            if (sourceNode && targetNode && 
+                (sourceNode.type === nodeTypes.MAIN || expandedNodes.has(sourceNode.id)) &&
+                (targetNode.type === nodeTypes.MAIN || expandedNodes.has(targetNode.id))) {
                 ctx.moveTo(sourceNode.x, sourceNode.y);
                 ctx.lineTo(targetNode.x, targetNode.y);
             }
         });
         ctx.stroke();
 
-        // Draw nodes with batch processing
+        // Draw nodes with type-specific styling
         nodes.forEach(node => {
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-            ctx.fillStyle = selectedNode === node ? '#e74c3c' : '#3498db';
-            ctx.fill();
+            if (!node.visible) return;
+            if (node.type === nodeTypes.MAIN || expandedNodes.has(node.parentId)) {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                
+                // Style based on node type
+                if (node.type === nodeTypes.MAIN) {
+                    ctx.fillStyle = selectedNode === node ? '#e74c3c' : '#3498db';
+                } else {
+                    ctx.fillStyle = selectedNode === node ? '#e67e22' : '#95a5a6';
+                }
+                
+                ctx.fill();
+
+                // Add expansion indicator for main processes with subprocesses
+                if (node.type === nodeTypes.MAIN && node.subprocesses.length > 0) {
+                    const isExpanded = expandedNodes.has(node.id);
+                    drawExpandIndicator(node, isExpanded);
+                }
+            }
         });
 
         // Draw node labels in a separate pass
@@ -210,6 +294,7 @@ function drawWorkflow() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         nodes.forEach(node => {
+            if (!node.visible) return;
             ctx.fillText(node.id, node.x, node.y);
         });
 
@@ -217,6 +302,25 @@ function drawWorkflow() {
         lastDrawTime = now;
         isDrawingRequested = false;
     });
+}
+
+// Add expansion indicator drawing
+function drawExpandIndicator(node, isExpanded) {
+    ctx.save();
+    ctx.translate(node.x + node.radius - 10, node.y - node.radius + 10);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    if (isExpanded) {
+        ctx.moveTo(-4, -2);
+        ctx.lineTo(4, -2);
+        ctx.lineTo(0, 2);
+    } else {
+        ctx.moveTo(-2, -4);
+        ctx.lineTo(-2, 4);
+        ctx.lineTo(2, 0);
+    }
+    ctx.fill();
+    ctx.restore();
 }
 
 // Optimize node detection
@@ -262,6 +366,23 @@ canvas.addEventListener('mouseup', () => {
     selectedNode = null;
 });
 
+// Update node click handling
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / scale;
+    const y = (e.clientY - rect.top) / scale;
+
+    const node = findNodeUnderCursor(x, y);
+    if (node && node.type === nodeTypes.MAIN && node.subprocesses.length > 0) {
+        if (expandedNodes.has(node.id)) {
+            expandedNodes.delete(node.id);
+        } else {
+            expandedNodes.add(node.id);
+        }
+        drawWorkflow();
+    }
+});
+
 // Add canvas styling
 canvas.style.border = '1px solid #ccc';
 canvas.style.background = '#ffffff';
@@ -275,3 +396,43 @@ window.addEventListener('load', () => {
         window.initializeVisualization();
     }
 });
+
+// Modify node creation to include type and collapsed state with visibility rules
+function createNode(id, type = nodeTypes.MAIN) {
+    return {
+        id: String(id),
+        type: type,
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: type === nodeTypes.MAIN ? 
+            visibilityConfig.maxNodeSize : 
+            visibilityConfig.minNodeSize,
+        isCollapsed: true,
+        subprocesses: [],
+        visible: true
+    };
+}
+
+// Add visibility management
+function updateNodeVisibility() {
+    if (!nodes || nodes.length === 0) return;
+
+    // Sort nodes by importance (e.g., number of connections)
+    const nodeConnections = nodes.map(node => ({
+        node,
+        connections: edges.filter(e => 
+            e.source === node.id || e.target === node.id
+        ).length
+    })).sort((a, b) => b.connections - a.connections);
+
+    // Show only the most important nodes
+    nodeConnections.forEach((item, index) => {
+        item.node.visible = index < visibilityConfig.maxVisibleNodes;
+    });
+
+    // Update edges visibility based on visible nodes
+    edges.forEach(edge => {
+        edge.visible = nodes.find(n => n.id === edge.source)?.visible &&
+                      nodes.find(n => n.id === edge.target)?.visible;
+    });
+}
