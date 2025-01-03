@@ -250,43 +250,47 @@ async function processFileData(file) {
                         window.updateVisualization(parsedData);
                     }
                     
-                    // Then run analysis
-                    const analysis = await analyzewithLLM(parsedData);
+                    // Calculate metrics immediately
+                    const cycleTime = calculateCycleTime(parsedData);
+                    const variants = calculateVariants(parsedData);
+                    const bottlenecks = identifyBottlenecks(parsedData);
                     
-                    // Update metrics with real data
+                    // Update metrics with actual values
                     const metrics = {
-                        cycleTime: {
-                            value: calculateCycleTime(parsedData),
+                        cycletime: {
+                            value: parseFloat(cycleTime),
                             breakdowns: [{
                                 process: 'Process Analysis',
                                 subprocess: 'Cycle Time',
-                                value: calculateCycleTime(parsedData),
+                                value: cycleTime,
                                 details: `Based on ${parsedData.nodes.length} nodes and ${parsedData.edges.length} connections`
                             }]
                         },
                         variants: {
-                            value: calculateVariants(parsedData),
+                            value: parseInt(variants),
                             breakdowns: [{
                                 process: 'Process Analysis',
                                 subprocess: 'Variants',
-                                value: calculateVariants(parsedData),
+                                value: variants,
                                 details: `Found ${findAllPaths(parsedData).length} unique process paths`
                             }]
                         },
                         bottlenecks: {
-                            value: identifyBottlenecks(parsedData),
+                            value: parseInt(bottlenecks),
                             breakdowns: [{
                                 process: 'Process Analysis',
                                 subprocess: 'Bottlenecks',
-                                value: identifyBottlenecks(parsedData),
-                                details: `Identified ${identifyBottlenecks(parsedData)} potential bottlenecks`
+                                value: bottlenecks,
+                                details: `Identified ${bottlenecks} potential bottlenecks`
                             }]
                         }
                     };
 
+                    // Update the display
                     updateMetrics(metrics);
                     
-                    // Show analysis result in a less intrusive way
+                    // Then run analysis
+                    const analysis = await analyzewithLLM(parsedData);
                     console.log('Analysis result:', analysis);
                     
                     resolve(parsedData);
@@ -421,16 +425,16 @@ function connectToSystem(systemType, apiKey) {
 function initializeAnalysis() {
     console.log('Initializing analysis page');
     
-    // Initialize with meaningful default metrics
+    // Initialize with non-zero default metrics
     const defaultMetrics = {
-        cycleTime: { 
+        cycletime: { 
             value: '0.0',
             breakdowns: [
                 {
-                    process: 'Default',
-                    subprocess: 'No data',
+                    process: 'Awaiting Data',
+                    subprocess: 'No process data',
                     value: '0.0',
-                    details: 'No process data available yet'
+                    details: 'Upload data to calculate cycle time'
                 }
             ]
         },
@@ -438,10 +442,10 @@ function initializeAnalysis() {
             value: '0',
             breakdowns: [
                 {
-                    process: 'Default',
-                    subprocess: 'No data',
+                    process: 'Awaiting Data',
+                    subprocess: 'No process data',
                     value: '0',
-                    details: 'Upload data to see process variants'
+                    details: 'Upload data to analyze variants'
                 }
             ]
         },
@@ -449,8 +453,8 @@ function initializeAnalysis() {
             value: '0',
             breakdowns: [
                 {
-                    process: 'Default',
-                    subprocess: 'No data',
+                    process: 'Awaiting Data',
+                    subprocess: 'No process data',
                     value: '0',
                     details: 'Upload data to identify bottlenecks'
                 }
@@ -458,26 +462,10 @@ function initializeAnalysis() {
         }
     };
 
-    // Ensure metric elements exist before updating
-    const metricElements = {
-        cycleTime: document.getElementById('cycletime'),
-        variants: document.getElementById('variants'),
-        bottlenecks: document.getElementById('bottlenecks')
-    };
+    // Update metrics display immediately
+    updateMetrics(defaultMetrics);
 
-    // Update metrics display
-    Object.entries(defaultMetrics).forEach(([key, data]) => {
-        const element = metricElements[key];
-        if (element) {
-            element.textContent = data.value;
-            element.setAttribute('data-metric', key);
-            element.setAttribute('data-breakdowns', JSON.stringify(data.breakdowns));
-            // Make it clear it's clickable
-            element.style.cursor = 'pointer';
-        }
-    });
-
-    // Initialize click handlers for metrics
+    // Initialize click handlers for detailed view
     initializeMetricClickHandlers(defaultMetrics);
 }
 
@@ -571,8 +559,20 @@ function generateVariantAnalysis(data) {
 
 function generateBottleneckAnalysis(data) {
     const incomingEdges = {};
+    const processTypes = {};
+    
+    // Analyze each edge to categorize nodes and count connections
     data.edges.forEach(edge => {
         incomingEdges[edge.target] = (incomingEdges[edge.target] || 0) + 1;
+        
+        // Categorize process type based on naming conventions and connections
+        if (edge.target.startsWith('=')) {
+            processTypes[edge.target] = 'Merge Point';
+        } else if (/^[A-Z]/.test(edge.target)) {
+            processTypes[edge.target] = 'Main Process';
+        } else {
+            processTypes[edge.target] = 'Subprocess';
+        }
     });
 
     const bottlenecks = Object.entries(incomingEdges)
@@ -583,11 +583,25 @@ function generateBottleneckAnalysis(data) {
     return `
         <strong>Identified Bottlenecks: ${bottlenecks.length}</strong><br><br>
         Top Bottleneck Points:<br>
-        ${bottlenecks.map(([node, count]) => 
-            `• ${node}: ${count} incoming connections`
-        ).join('<br>')}<br><br>
-        These points may cause process delays and should be reviewed for optimization.
+        ${bottlenecks.map(([node, count]) => `
+            • ${node} (${processTypes[node]})<br>
+            &nbsp;&nbsp;${count} incoming connections<br>
+            &nbsp;&nbsp;Impact: ${getBottleneckImpact(node, count, processTypes[node])}
+        `).join('<br>')}<br><br>
+        These points require attention as they represent convergence of multiple process flows.
     `;
+}
+
+function getBottleneckImpact(node, count, type) {
+    if (type === 'Merge Point') {
+        return 'Data consolidation point that may cause processing delays';
+    } else if (count > 10) {
+        return 'Critical congestion point requiring immediate review';
+    } else if (count > 5) {
+        return 'Moderate bottleneck with potential for queue formation';
+    } else {
+        return 'Minor convergence point to monitor';
+    }
 }
 
 // Update metrics with better error handling
@@ -600,7 +614,21 @@ function updateMetrics(data) {
     Object.entries(data).forEach(([id, metricData]) => {
         const element = document.getElementById(id);
         if (element) {
-            element.textContent = metricData.value;
+            // Format the value appropriately
+            let displayValue;
+            if (typeof metricData.value === 'number') {
+                displayValue = id === 'cycletime' ? 
+                    metricData.value.toFixed(1) : 
+                    Math.round(metricData.value).toString();
+            } else {
+                displayValue = metricData.value;
+            }
+
+            // Update the display immediately
+            element.textContent = displayValue;
+            element.style.opacity = '1'; // Ensure visibility
+            
+            // Store the full data for modal display
             element.setAttribute('data-metric', id);
             element.setAttribute('data-breakdowns', JSON.stringify(metricData.breakdowns));
         } else {
@@ -769,26 +797,24 @@ function generateFallbackAnalysis(data) {
 
 // Add these helper functions to calculate basic metrics
 function calculateCycleTime(data) {
-    // Simple calculation: average path length
     const paths = findAllPaths(data);
-    const avgLength = paths.reduce((sum, path) => sum + path.length, 0) / paths.length;
-    return avgLength.toFixed(1);
+    const avgLength = paths.length > 0 ? 
+        paths.reduce((sum, path) => sum + path.length, 0) / paths.length : 
+        0;
+    return avgLength;
 }
 
 function calculateVariants(data) {
-    // Count unique paths
     const paths = findAllPaths(data);
-    return paths.length.toString();
+    return paths.length;
 }
 
 function identifyBottlenecks(data) {
-    // Count nodes with multiple incoming edges
     const incomingEdges = {};
     data.edges.forEach(edge => {
         incomingEdges[edge.target] = (incomingEdges[edge.target] || 0) + 1;
     });
-    const bottlenecks = Object.values(incomingEdges).filter(count => count > 1).length;
-    return bottlenecks.toString();
+    return Object.values(incomingEdges).filter(count => count > 1).length;
 }
 
 function findPath(start, end, edges, visited) {

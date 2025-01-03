@@ -1,0 +1,311 @@
+Aug 9 
+ob_ = 52  @07:10-07:49 *s.s. sos 7:09
+ob_ = 80  @7:50-08:35
+ob_ = 114 @08:45-08:39
+ob_ = 23 @11:25-11:40 *crl
+ob_ = 13 @11:45-11:55  *s.s. 1 bag
+ob_ = 57 @12:10-12:40 *eos 16:31
+
+Batch = 37+41+45 @8:50-9:30
+ib_ = 202+12+124+110+220+202+216
+
+Aug 10
+ob_ = 16 @6:05-6:14 *three bags, batching stalled got switch to ob_ sos 5:57
+ob_ = 126 @6:25-6:42
+ob_ = 124 @7:46 -8:38
+ib_c Drinks = 72+24+62+60+116+92+6+18 *Stow at 8:45
+ib-c mix = 62+90+56+54+60+48
+ib_c liquor = 72 
+ib_a small = 90 
+ib_a chips=162
+ib_b chips =110
+lunch =1 @10:53-11:23
+ib_c-mix=108+80 + 99+86+118+8 *eos 15:05
+
+Aug 13
+ib_F = 110+120+130+130 *sos 5:55
+ob_c = 41 8:04-8:33
+ib_a_mix =110 +188+36+124+199+
+ib-b = 100
+ib_a-mix = 192+200+62+120+240+161 *eos 16:29
+
+
+Aug 15
+
+ib_a = 200+150+252+100+ * sos 5:58
+ob_ = 101 @9:49-1:38 *crl
+ob_a = 215 @11:25-12:49 *srg sp 
+ob_c = 151 @13:00-14:05 *eos 14:31
+
+Aug 16
+ob_c = 65  @6:05-6:43 *traffic jammed srg  *sos 5:55
+ob_a = 144 @10:42-11:50
+ib_c eggs = 165+90 *damages eggs
+ib_mix = 205+66+78+164+144+15+240+8+148+171+236+266+172+118+102+108 *eos 16:30
+
+
+Aug 17
+ib_a = 198 +192+120+84+78 + 148+202+50+ *sos 5:58
+ib_b = 51
+ib_mix = 198+41+112+84+254+120+96+90+18
+
+ob_a = 192 @14:49-16:05 
+ob_ = 15 @16:10-16:23 *eos 16:30
+
+Aug 20
+ob_a = 52+27+82 *sos 5:57
+ib_b = 77+52
+ib_mix = 81+110
+ib_f = 112+156+24+72+78+91+135
+
+ob_ = 81 @11:40-12:08
+ob_ = 56 @12:15 -12:45
+ob_ = 52 @12:50-13:23
+ib_a = 150+144+24+48+264+90 *eos 16:30
+
+
+Aug 22
+ib_a = 390 *random mixed u-boat *sos 5:55
+ib_b = 39+48
+ib_c = 234
+ib_a = 250+240+170++272+136+186+88 * eos 16:30
+
+aUg 23
+ob_ = 31+83  @6:00-7:15 * sos 5:57
+ob_ = 115 @07:20-8:07
+ib_c = 86+45+60+160+202+160+ 52+152
+ib_c Salad_kit = 132+258+56+72+52+554
+ib_c = 232+120+156+100 * eos 16:32
+
+Aug 24
+ob_ = 63 @8:22-9:10 *sos 8:22
+ob_a = 101 @9:20-10:09  *yield for new inbounders and pickers traffic jams, safety 
+ib_mix = 230 + 140+275+200+159+
+ib_c = 40+60+120 * eos 16:30
+
+
+Aug 28
+ob_a = 56 @6:05-6:40  *sos 5:55
+ib_a Drinks= 12+244+53+56+72+68+53+51+73+54+16+21+48+3++40+52+13
+ob_a = 31 @7:45-8:15 *atoc
+ob_c =42 @8:20-8:49 *ctoa  
+ib_a = 180+68+199+83+101+48+244+24+108+40 *eos 16:31 
+
+Aug 29
+ib_a = 140+72+160+80+176 *sos 6:58
+ib_c Drinks 68+23+100+137
+ob_a =145  @11:35-12:33 *srg atoz
+ob_c = 119 @12:39-1:33 *crl
+ob_ =56 @13:38-14:25
+ob_ = 65 @14:50-15:22 *atoc rhs eos 16:30
+
+Aug 30
+ib_c drinks = +142+32 * sos 5:56
+ib_c Eggs= 145+170
+ib_c = 144+298+164+38+258+136+102+92+84+32++12+67+37
+ib_c Meat = 112+24+27+48+12
+ib_c Milks = 52+6
+ob_c = 157 @11:35-12:43 
+ob_c = 67 @12:50-13:33 *crl
+ob_ = 20 @13:40-14:03  *not even cpt why small cart?  eos 16:30 
+
+Aug 31
+ib_c Drinks = 120+26 *sos 5:59
+ib_c  = 28+24
+
+ib_c = 96
+ib_c = 295+30+24 *asked sunny asked to drinks and bigs wild other not 
+ib_f = 160+305
+ob_a = 185 @11:30-12:55
+ob_a = 23 @13:05-13:30 *cracker nuts overflow-Searching missing items *eos 13:54
+ 
+Sep 3
+Batch = 33+41+44 * sos 5:57
+ib_f = 12+121+128+138+150
+ob_c = 51 @9:20-9:53 *changed temp from ob desk 
+ob_c =76 @12:03-11:50 *ran down ob desk for assignment 
+ob_c =86 @11:30-12:12 
+ob_c =60 @12:20-12:50
+ob_c =65 @13:00-13:33 
+ib_c =  128+ 272  *misc 128+ singles+272
+ob_b = 36+24 * eos 16:30
+
+
+Sep 5
+ob_a = 64 @ 6:00-6:40   * crl sos 5:55
+ob_a = 44 @11:35-12:00 *crl
+
+ob_c = 191  @6:51-6:54
+ob_c = 52    @8:02-8:35
+ob_c = 101 @8:45-9:29
+
+Batch = 43+41+32
+ib_a =  32+126+177+120+24+50+75
+ib_b =  39+99 +79+18+23 *eos 16:30
+
+Sep 6 
+ob_bigs =  37 + * sos 6:56
+prob_solv = 30
+ib_c =125+70+106+80+24+140+122+24+65+32+376+12+30 122+108
+
+ib_c_drinks_milk =48+84
+ib_c_Eggs= 150+30+30+145+65+80+45++55+90+120+13
+ib_c meat  =60+24+81+18+24+42 *meat by pound = 660
+Batch =33 *eos 16:30
+
+Sep 7
+ib_a_Noodle = 82 *sos 5:55 , doing survey, waiting assignment, found equipment in frozen,  clean up area before building the cart, wrap up left behind
+ib_a_mix =216 *Audit 7:34-7:39 talking not stopping but rather calling out the other person on the way to break
+
+
+ib_c_Drinks = 30+16+96+ *8:00am
+ib_c_milk = 56
+ib_c=236+96+120+48+56+156+30
+ib_c Meat= 84+36+12+48+28+10+48+32+30+12+24+12 *Meat by pound= 450 lbs
+ib-c_Tofu = 102+
+ib-c_Fruit kit = 80+88+40+ *eos 14:31
+
+
+Sep 10
+ib_a_ cda =26+19 * loose, individuals, over size sos 5:55
+ib_a_Cda = +58+95+
+ib_Big_cda =12+3+2
+ib_a_Chips n mix = 80  *through entire warehouse
+ob_c = 48+ @ 7:45-8:40
+Stage_bigs= 60
+ib_a_Cracker and nuts =212
+ib_a Pet foods =36+ 
+
+ob_c =40 @11:30-11:57
+ob_c =24 @12:00-12:22
+ob_c =52  @12:29-12:59
+ob_c =77 @1:05-1:39
+ob_c =63 @13:50-14:22
+ob_f = 19  @15:00-15:12
+ib_f = 72+152+162 @15:15-16:20 *eos 16:30
+
+Sep 12
+Ob-f = 33 @6:25-6:38 *broken prntr sos 6:14
+Ob-f =45 @6:50-7:03
+Ib-f =8+124+138+62 *start 7:03
+Ob-c =97 @8:43-9:24
+ib_Chips =46
+Ib-c=8+138
+ib_c_Eggs =19+16
+Ib-a-big= 52 @9:40-11:00
+Ib-a= 150+102+120+90
+Ib-b =25+10+34+14 *per xndra ambient towels stow in big
+ib_a Ctacker & nuts =70 *per xndra stow in diet_nutriction
+ib_a_Cookies=48 *eos 15:31
+
+Sep 13
+ib_c_Eggs =130+50+75+120 *sos 6:08 
+Ib-a =135 @7:00-7:20 *per snny and jl expired in 30 minutes (rec’d on Monday, sep 9)
+ib_c_Eggs =60+54+28+70+100+10
+ib_c_Milks=60+72+48+36
+Ib-c= 40+47+25+30+166+125+68
+ib_c_Drinks =78+52+18
+Ib-c=64+116+135+123+36+88+93+112+90+82
+Ib-a=140+12 * eos 16:30
+
+Sep 14
+ib_a = 300 @6:07-7:07 * preloaded u-boats, item all over place sos 6:04 
+ib_b = 43 @7:10-7:23
+ib_b =48 @ 7:25-7:45
+ib-c chocolate = 44+24+42+126+18 @ 7:53-8:17
+ib_a canned food = 144 @ 8:45-9:05
+ib_a =140 @9:05-9:20
+ib_a = 36+62+74+40 
+ib_b = 20
+ib_b cda = 25+20
+ib_a = 156 + 172+12 *eos 13:58
+
+
+
+
+Sep 18
+ib_c chocolate = 88 @7:05-7:15 * sos 6:57
+ib_a = 214 @7:20-8:05
+downtime =0  @ 8:05-8:35  *staff meeting
+ib-b pet food = 33 @8:39-8:48  *heavy bags  approx, 300 lbs
+ib-a cda = 122 @8:50-9:10 * mix with pet foods, personal healthcare
+ib-a pasta =98 @ 9:15 - 9:40 *mix with pet, condiments 
+ib_a  = 200 @9:45-10:13 * mix
+ib_b water = 56 10:15- 10:26 *water one gallon each, 468 lbs
+ib_a =134+82 @10:30-11:00  *lunch
+ib_a = 154 @ 11:31-11:50  *back from lunch
+ib-b drinks = 40+26+12 @ 11:55-12:10 *12-packs sodas about = 618 lbs
+ib_a = 66+48+ 60+48 @12:11-12:50
+ib_a = 48+48+48+72+48+36 @12:55-13:50
+ib_a condiments = 78+48+108 @13:54-14:30 *heavy glass jars net weight = 351 lbs
+ib_b chips = 36+84 @14:30-15:12 pm *srg am refused to swap ib-ob for relief 
+ib_a = 300 @15:43-16:26 *eos 16:29
+
+
+
+Sep 19
+ob_c = 45 @6:10-6:34 *sos 5:55, assgn crl
+ob_c = 52 @6:39-7:05 *Sm
+ob_C = 92 @7:10-7:53 *Sm
+ob_c= 133 @8:00-9:03 *Sm
+ob_c = 123 @9:07-9:56 *Sm
+break =1 @ 10:06-10:21
+ob_c =43 @10:24-10:53 *Sm
+ob_c =92 @11:35-12:16 *Sm SOS
+ob_c 78 @12:23-13:12 *crl
+ob_c =29 @13:19-13:42 *crl, CPT 
+Ib_c fruit kit = 22+13+22+22+20+12+22 @13:42-15:41 *2-lb pack = 266 lbs
+ib_c fruit kit = 44+8+22+37+47+30+11+15+17+12+5+5+12+15+32+5+20+7 *10-oz pack = 215 lbs
+ib_c fruit kit = 9+14+4 *1-lb pack= 18 lbs
+ib_c fruit kit = 11+46+11+2 *7.5-oz pack =33 lbs
+ib_c fruit kit = 12+6 *13-oz pack, =15 lbs
+break =1 @ 15:47-16:02 
+ib_a condiments = 118 @16:02-16:26 *eos 16:30
+
+
+
+
+Sep 20
+Ib-b drinks =54 @7:00-7:15 *per s.s. sos 6:51, 144oz-pack = 486 lbs
+ib_c eggs = 30+30+30+30+30 @7:20-7:45 *2-lbs-4oz =338 lbs
+ib_c eggs = 15+15+15 @7:45-7:50 *1-lb-8oz, =68 lbs
+ib_c eggs = 30 @7:52-7:54 *12oz-pack,= 23 lbs
+ib_c milks = 12 @7:54-7:55 * 32oz-pack, =24 lbs
+ib_c eggs = 30+30+30+20+30+100 @7:55-8:25 *2lbs-4oz pack, = 540 lbs
+ib_c milk = 4+12+4 @ 8:30-8:35 *128oz-container, =120 lbs
+ib_c milk = 18+24+18 @8:35-8:50 *52oz-container, =195 lbs
+ib_c milk = 12+24+6+6+30+12+12+40 @8:50-9:19 *64oz-container, =568 lbs
+ib_c eggs = 45+45+45+45+120 @9:25-9:55 *24oz-carton,= 450 lbs
+ib_c cheese = 100+100+92 @10:00-10:40 *10:10, 10:20, 10:42 interval
+break =1 @10:47-11:03
+Lunch =1 @11:04-11:34 
+ib_c cheese = 26  @11:34-40 *sos 11:34
+ib_c = 36+24+49+60+24 @ 11:58-12:28
+ib_c= 42+48+12+29+30+39+42+72 @12:35-13:42
+ib_c= 32+24+52+92+62 @13:55-14:45
+Break =1 @14:45-15:00
+ib_c = 64 @15:00-15:10 
+Bin_count = 300 @ 15:12-16:10 *about 10 plus bins, 300 items plus (not kept track)
+ib_c =40 @16:12-16:27 *eos 16:31
+
+
+
+
+Sep 21
+ib_a = 168+30+40+24 @ 8:00-8:48 *sos 8:00 per s.s. yellow cone smaller items
+ib_b = 13 @8:52-8:59
+ib_a = 212 @9:06-9:57
+ib_c = 41 @9:59-10:05
+break = 1 @10:05-10:20
+ib_b = 44 @10:20-10:34
+ob_a = 112  @10:40-11:30 *crl
+lunch =1 @11:35-12:07 
+ob_big = 16 @11:40-12:25 *not cpt, going entire building. ambient to chip, to bigs to chilled to bigs.
+ob_c =141 @12:35 -13:39 *clr, went back to ob desk for assignment
+ob_c =153 @13:45-14:55  *sm
+ob-c = 178 @15:00-16:10 *sm 
+break = 1 @16:15-16:30 * eos 16:31
+
+
+
+

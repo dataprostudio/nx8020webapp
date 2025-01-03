@@ -213,6 +213,8 @@ button:hover {
     text-align: center;
     cursor: pointer;
     transition: color 0.2s;
+    opacity: 1; /* Ensure visibility */
+    display: block; /* Guarantee proper display */
 }
 
 .metric-value:hover {
