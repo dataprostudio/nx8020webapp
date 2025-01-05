@@ -1,23 +1,39 @@
 #workflowCanvas {
     display: block;
     width: 100% !important;
-    height: 100% !important;
+    height: calc(100% - 60px) !important; /* Account for controls height */
     min-height: 400px;
     background: #ffffff;
     border: 1px solid #ddd;
     margin: 0;
     padding: 0;
+    max-width: 1200px;
+    cursor: grab;
+}
+
+#workflowCanvas:active {
+    cursor: grabbing;
 }
 
 .workflow-container {
     width: 100%;
     height: calc(100vh - 200px);
     min-height: 500px;
+    max-height: calc(100vh - 200px);
     position: relative;
     background: #ffffff;
     border: 1px solid #ddd;
     padding: 20px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column; /* Change to column layout */
+    justify-content: flex-start; /* Align items to top */
+    align-items: center;
+}
+
+/* Adjust legend position for better visibility */
+.workflow-container {
+    position: relative;
 }
 
 .workflow-legend {
@@ -29,12 +45,15 @@
     border-radius: 5px;
     border: 1px solid #ddd;
     font-size: 12px;
+    min-width: 150px;
+    z-index: 100;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
     margin: 5px 0;
+    gap: 8px;
 }
 
 .legend-color {
@@ -42,4 +61,18 @@
     height: 12px;
     margin-right: 5px;
     border-radius: 50%;
+}
+
+.legend-color.bottleneck {
+    border: 2px solid #e74c3c;
+    box-shadow: 0 0 4px rgba(231, 76, 60, 0.5);
+}
+
+/* Position controls at bottom */
+.controls {
+    margin-top: 10px;
+    height: 40px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
 }

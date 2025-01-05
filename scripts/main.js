@@ -25,9 +25,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Handle visualization tab specifically
         if (pageId === 'visualization' && window.workflowVisualizer) {
-            setTimeout(() => {
-                window.workflowVisualizer.resizeCanvas();
+            requestAnimationFrame(() => {
+                window.workflowVisualizer.resizeCanvas(true);
                 window.workflowVisualizer.draw();
+            });
+        }
+
+        // Special handling for visualization tab
+        if (pageId === 'visualization') {
+            console.log('Switching to visualization tab');
+            setTimeout(() => {
+                const canvas = document.getElementById('workflowCanvas');
+                if (canvas) {
+                    // Ensure canvas is visible and has dimensions
+                    canvas.style.display = 'block';
+                    const container = canvas.parentElement;
+                    if (container) {
+                        canvas.width = container.clientWidth;
+                        canvas.height = container.clientHeight;
+                    }
+                    
+                    // Initialize or refresh visualizer
+                    if (typeof window.ensureVisualizerInitialized === 'function') {
+                        window.ensureVisualizerInitialized();
+                    } else {
+                        console.error('Visualizer initialization function not found');
+                    }
+                } else {
+                    console.error('Canvas element not found');
+                }
             }, 100);
         }
     }
@@ -185,7 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const metricId = card.querySelector('.metric-value').id;
                 const metricData = metrics[metricId];
                 
-                modalTitle.textContent = card.querySelector('h4').textContent;
+                // Fix: Remove info icon 'i' from heading text consistently
+                const headingText = card.querySelector('h4').childNodes[0].textContent.trim();
+                modalTitle.textContent = headingText;
+                
                 breakdownList.innerHTML = metricData.breakdowns.map(item => {
                     if (metricId === 'cycletime') {
                         return `

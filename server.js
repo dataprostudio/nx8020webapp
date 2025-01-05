@@ -75,7 +75,9 @@ const upload = multer({
 });
 
 // Initialize global variables for LLM
-let model, context, session;
+let model = null;
+let context = null;
+let session = null;
 
 // Helper Functions
 async function checkLlamaCppCudaBuild() {
@@ -673,10 +675,13 @@ const startServer = async () => {
     try {
         const port = await findAvailablePort(3000);
         
-        // Initialize LLM
+        // Try to initialize LLM
         let llmInitialized = false;
         try {
             llmInitialized = await initializeLLM();
+            model = global.llamaModel;
+            context = global.llamaContext;
+            session = global.llamaSession;
         } catch (error) {
             console.error('Failed to initialize LLM:', error.message);
         }
