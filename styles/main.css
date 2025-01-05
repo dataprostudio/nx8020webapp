@@ -38,12 +38,14 @@ body {
     text-decoration: none;
     padding: 15px 20px;
     display: block;
-    transition: background 0.3s;
+    transition: background 0.3s, color 0.3s;
+    cursor: pointer;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
     background: #34495e;
+    color: #3498db;
 }
 
 /* Main content area */
@@ -51,20 +53,21 @@ body {
     margin-left: 250px;
     padding: 20px;
     flex-grow: 1;
+    min-height: 100vh;
+    background: #fff;
+    position: relative;
 }
 
-/* Page sections */
+/* Page sections - Update display handling */
 .page {
     display: none;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    padding: 20px;
 }
 
 .page.active {
     display: block;
-    opacity: 1;
 }
 
 /* Upload section styles */
@@ -80,24 +83,66 @@ body {
     padding: 20px;
     background: #f5f6fa;
     border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    height: 300px; /* Set fixed height for both containers */
 }
 
 /* Form elements */
-input, select, button {
+input, select {
     margin: 10px 0;
     padding: 8px;
     width: 100%;
+    height: 40px; /* Consistent height for inputs */
+    box-sizing: border-box;
 }
 
-button {
+/* Ensure the form fills available space */
+#fileForm,
+#apiForm {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+#fileInput {
+    height: 40px; /* Match height of other inputs */
+    margin: 10px 0;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+h3 {
+    margin: 0 0 20px 0; /* Reduce space after headers */
+}
+
+/* Move button containers to bottom of their containers */
+.button-container {
+    margin-top: auto; /* Push buttons to bottom */
+    width: 100%;
+}
+
+.button-container button {
+    width: 100%;
+    height: 40px; /* Consistent height for buttons */
+    margin-top: 10px;
+}
+
+/* Button styles */
+.button-container button {
+    width: 100%;
+    padding: 12px 20px;
     background: #3498db;
     color: white;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.3s;
 }
 
-button:hover {
+.button-container button:hover:not(:disabled) {
     background: #2980b9;
 }
 
@@ -294,4 +339,158 @@ button:hover {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     min-height: 400px;
+}
+
+/* Add upload status styles */
+#uploadStatus {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Improve file input and button styles */
+#fileInput {
+    display: block;
+    margin: 20px 0 auto 0; /* Change margin to push input to top */
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+#fileInput:hover {
+    border-color: #3498db;
+}
+
+#uploadButton {
+    background: #3498db;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+    width: 100%;
+}
+
+#uploadButton:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+#uploadButton:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+/* Add these new styles */
+.button-container {
+    margin-top: 20px;
+}
+
+.button-container button {
+    width: 100%;
+    padding: 12px 20px;
+}
+
+/* Simulation page styles */
+.simulation-container {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    height: 100%;
+    padding: 20px;
+}
+
+.simulation-controls {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    background: #f5f6fa;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-group select,
+.control-group input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.simulation-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.stat-card div {
+    font-size: 24px;
+    color: #3498db;
+    font-weight: bold;
+}
+
+.simulation-view {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    min-height: 400px;
+}
+
+#simulationCanvas {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* Update button styles for simulation */
+#startSimulation {
+    background: #2ecc71;
+}
+
+#startSimulation:hover:not(:disabled) {
+    background: #27ae60;
+}
+
+#stopSimulation {
+    background: #e74c3c;
+}
+
+#stopSimulation:hover:not(:disabled) {
+    background: #c0392b;
+}
+
+#stopSimulation:disabled {
+    background: #95a5a6;
+}
+
+/* Add system indicator styles */
+.system-indicator {
+    margin: 10px 0;
+    padding: 8px 12px;
+    background: #f5f6fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #666;
 }

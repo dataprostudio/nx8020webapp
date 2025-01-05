@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ...existing code... -->
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/workflow.css">
+</head>
+<body>
+    <!-- ...existing code... -->
+    <script>
+        async function loadScript(src, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = '/' + src; // Add leading slash
+                        script.type = 'text/javascript'; // Explicitly set type
+                        script.async = true;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.body.appendChild(script);
+                    });
+                    console.log(`Successfully loaded: ${src}`);
+                    return;
+                } catch (error) {
+                    console.error(`Failed to load ${src} (attempt ${i + 1}):`, error);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await loadScript('scripts/visualization.js');
+                await loadScript('scripts/main.js');
+                if (window.initNavigation) {
+                    window.initNavigation();
+                }
+            } catch (error) {
+                console.error('Script loading failed:', error);
+                alert('Failed to load application scripts. Please check console for details.');
+            }
+        });
+    </script>
+</body>
+</html>

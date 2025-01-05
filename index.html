@@ -3,163 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Process Mining Web App</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/workflow.css">
+    <title>NX8020™ Process Optimizer</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/workflow.css">
+    <link rel="icon" href="data:," />
 </head>
 <body>
-    <nav class="sidebar">
-        <div class="logo">Process Mining</div>
+    <div class="sidebar">
+        <div class="logo">NX8020™</div>
         <ul class="nav-links">
-            <li><a href="#upload" data-page="upload">Data Input</a></li>
-            <li><a href="#visualization" data-page="visualization">Workflow Visualization</a></li>
-            <li><a href="#analysis" data-page="analysis">Process Analysis</a></li>
-            <li><a href="#testbed" data-page="testbed">Test Bed</a></li>
+            <li><a href="#upload" data-page="upload">Data</a></li>
+            <li><a href="#visualization" data-page="visualization">Visualization</a></li>
+            <li><a href="#analysis" data-page="analysis">Analysis</a></li>
+            <li><a href="#simulation" data-page="simulation">Simulation</a></li>
         </ul>
-    </nav>
+    </div>
 
-    <main class="content">
-        <!-- Data Input Section -->
-        <section id="upload" class="page">
-            <h2>Data Input</h2>
+    <div class="content">
+        <div id="upload" class="page">
+            <h2>Data</h2>
             <div class="upload-container">
                 <div class="file-upload">
-                    <h3>File Upload</h3>
-                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.txt,text/csv,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-                    <button id="uploadButton">Upload File</button>
+                    <h3>Upload Process Data</h3>
+                    <input type="file" id="fileInput" accept=".csv,.txt,.xls,.xlsx">
+                    <div id="systemIndicator" class="system-indicator">System</div>
+                    <form id="fileForm">
+                        <div class="button-container">
+                            <button id="uploadButton">Upload</button>
+                        </div>
+                    </form>
+                    <div id="uploadStatus"></div>
                 </div>
                 <div class="api-integration">
-                    <h3>CRM/ERP Integration</h3>
+                    <h3>Real Time Data</h3>
                     <form id="apiForm">
                         <select id="systemType">
                             <option value="salesforce">Salesforce</option>
                             <option value="sap">SAP</option>
+                            <option value="oracle">Oracle</option>
                         </select>
-                        <input type="text" placeholder="API Key" id="apiKey">
-                        <button type="submit">Connect</button>
+                        <input type="password" id="apiKey" placeholder="Enter API Key">
+                        <div class="button-container">
+                            <button type="submit">Connect</button>
+                        </div>
                     </form>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Other sections will be hidden by default -->
-        <section id="visualization" class="page">
-            <h2>Workflow Visualization</h2>
+        <div id="visualization" class="page">
+            <h2>Process Visualization</h2>
             <div class="workflow-container">
                 <canvas id="workflowCanvas"></canvas>
+                <div class="workflow-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498db;"></div>
+                        <span>Main Process</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #95a5a6;"></div>
+                        <span>Sub Process</span>
+                    </div>
+                </div>
                 <div class="controls">
                     <button id="zoomInButton">Zoom In</button>
                     <button id="zoomOutButton">Zoom Out</button>
                     <button id="resetButton">Reset</button>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section id="analysis" class="page">
+        <div id="analysis" class="page">
             <h2>Process Analysis</h2>
             <div class="analysis-container">
                 <div class="metrics-panel">
-                    <h3>Process Metrics</h3>
                     <div class="metric-card">
-                        <h4>Average Cycle Time <span class="info-icon">i</span>
-                        <div class="tooltip">Measures the average duration of process completion, factoring in parallel paths and process depth. Lower values indicate more efficient processes.</div></h4>
-                        <div class="metric-value" id="cycletime" data-metric="cycletime">--</div>
+                        <h4>Cycle Time <span class="info-icon">i</span></h4>
+                        <div class="metric-value" id="cycletime">--</div>
+                        <div class="tooltip">Average time to complete a process cycle</div>
                     </div>
                     <div class="metric-card">
-                        <h4>Process Variants <span class="info-icon">i</span>
-                        <div class="tooltip">Identifies unique process execution paths. Higher numbers suggest more complex decision-making and potential optimization opportunities.</div></h4>
+                        <h4>Process Variants <span class="info-icon">i</span></h4>
                         <div class="metric-value" id="variants">--</div>
+                        <div class="tooltip">Number of unique process paths</div>
                     </div>
                     <div class="metric-card">
-                        <h4>Bottlenecks <span class="info-icon">i</span>
-                        <div class="tooltip">Highlights process steps with high incoming connections or sequential dependencies that may slow down workflow. Critical for process optimization.</div></h4>
+                        <h4>Bottlenecks <span class="info-icon">i</h4>
                         <div class="metric-value" id="bottlenecks">--</div>
+                        <div class="tooltip">Critical process congestion points</div>
                     </div>
                 </div>
                 <div class="chart-container">
                     <canvas id="analysisChart"></canvas>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <div id="metricModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitle">Metric Breakdown</h3>
-                    <span class="modal-close">&times;</span>
+        <div id="simulation" class="page">
+            <h2>Process Simulation</h2>
+            <div class="simulation-container">
+                <div class="simulation-controls">
+                    <div class="control-group">
+                        <h3>Simulation Parameters</h3>
+                        <select id="simulationType">
+                            <option value="basic">Basic Simulation</option>
+                            <option value="advanced">Advanced Simulation</option>
+                            <option value="monte-carlo">Monte Carlo</option>
+                        </select>
+                        <input type="number" id="simulationDuration" placeholder="Duration (hours)" min="1" max="168">
+                        <input type="number" id="instanceCount" placeholder="Process Instances" min="1" max="1000">
+                        <div class="button-container">
+                            <button id="startSimulation">Start Simulation</button>
+                            <button id="stopSimulation" disabled>Stop</button>
+                        </div>
+                    </div>
+                    <div class="simulation-stats">
+                        <div class="stat-card">
+                            <h4>Running Time</h4>
+                            <div id="simTime">00:00:00</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Completed Instances</h4>
+                            <div id="completedCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Average Cycle Time</h4>
+                            <div id="avgCycleTime">--</div>
+                        </div>
+                    </div>
                 </div>
-                <div id="modalContent">
-                    <ul class="breakdown-list" id="breakdownList"></ul>
+                <div class="simulation-view">
+                    <canvas id="simulationCanvas"></canvas>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- Update script loading order and add improved error handling -->
+    <div id="metricModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Metric Details</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <ul id="breakdownList" class="breakdown-list"></ul>
+        </div>
+    </div>
+
+    <!-- Move scripts to the bottom of the body -->
     <script>
-        // Global error handler
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.message, e.filename, e.lineno);
-            // Prevent alert spam
-            if (!window.hasAlerted) {
-                window.hasAlerted = true;
-                alert('An error occurred: ' + e.message);
+        // Add this initialization check
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show initial page
+            const initialPage = document.getElementById('upload');
+            if (initialPage) {
+                initialPage.style.display = 'block';
+                initialPage.classList.add('active');
+            }
+            
+            // Activate initial navigation link
+            const initialLink = document.querySelector('[data-page="upload"]');
+            if (initialLink) {
+                initialLink.classList.add('active');
             }
         });
-
-        // Load scripts sequentially with error handling and retry
-        async function loadScript(src, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = src;
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.body.appendChild(script);
-                    });
-                    return;
-                } catch (error) {
-                    console.error(`Failed to load ${src}, attempt ${i + 1}/${retries}`);
-                    if (i === retries - 1) throw error;
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
-        }
-
-        // Initialize application components
-        async function initializeApp() {
-            try {
-                await loadScript('scripts/visualization.js');
-                await loadScript('scripts/main.js');
-                
-                // Initialize the current page
-                const currentPage = window.location.hash.slice(1) || 'upload';
-                const pageElement = document.getElementById(currentPage);
-                
-                if (pageElement) {
-                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                    pageElement.classList.add('active');
-                    
-                    // Initialize page-specific components
-                    if (currentPage === 'visualization' && window.initializeVisualization) {
-                        window.initializeVisualization();
-                    } else if (currentPage === 'analysis') {
-                        initializeAnalysis();
-                    }
-                }
-            } catch (error) {
-                console.error('Application initialization error:', error);
-                alert('Failed to initialize application. Please refresh the page.');
-            }
-        }
-
-        // Start initialization when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-        } else {
-            initializeApp();
-        }
     </script>
+    <script src="/scripts/main.js"></script>
+    <script src="/scripts/visualization.js"></script>
 </body>
 </html>
